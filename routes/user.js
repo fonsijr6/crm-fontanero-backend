@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
-const jwt = require('jsonwebtoken'); // usa 'jwt' y sé consistente
+const {user} = require('../middleware/user.mw')
 
 // --- Config JWT (desde variables de entorno) ---
 const ACCESS_SECRET  = process.env.JWT_ACCESS_SECRET;
@@ -10,6 +10,7 @@ const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 const ACCESS_TTL  = process.env.JWT_ACCESS_TTL  || '15m';
 const REFRESH_TTL = process.env.JWT_REFRESH_TTL || '7d'; // por si lo necesitas en otros sitios
 
+router.use(user)
 // Rutas para usuario
 router.post('/register', userController.registerUser);
 router.post('/login', userController.loginUser);
