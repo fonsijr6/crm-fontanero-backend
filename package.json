@@ -1,52 +1,28 @@
 {
-  "name": "crm-fontanero-backend",
-  "version": "0.1.0",
-  "type": "module",
-  "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "start": "node dist/server.js",
-    "dev": "npm run build && node dist/server.js",
-    "lint": "eslint ."
+  "name": "crm-fontanero-server",
+  "version": "1.0.0",
+  "description": "CRM API",
+  "homepage": "https://github.com/fonsijr6/crm-fontanero-backend#readme",
+  "bugs": {
+    "url": "https://github.com/fonsijr6/crm-fontanero-backend/issues"
   },
-  "dependencies": {
-    "@types/jsonwebtoken": "^9.0.10",
-    "bcrypt": "^6.0.0",
-    "bcryptjs": "^2.4.3",
-    "cookie-parser": "^1.4.6",
-    "cors": "^2.8.6",
-    "dotenv": "^16.6.1",
-    "express": "^4.22.1",
-    "helmet": "^7.0.0",
-    "jsonwebtoken": "^9.0.3",
-    "mongoose": "^8.22.0",
-    "morgan": "^1.10.0",
-    "winston": "^3.10.0",
-    "zod": "^3.22.2"
-  },
-  "devDependencies": {
-    "@types/bcryptjs": "^2.4.2",
-    "@types/cookie-parser": "^1.4.10",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^4.17.25",
-    "@types/helmet": "^0.0.48",
-    "@types/morgan": "^1.9.10",
-    "@types/node": "^20.19.30",
-    "eslint": "^8.55.0",
-    "nodemon": "^3.1.11",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
-  },
-  "description": "",
-  "main": "index.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/fonsijr6/crm-fontanero-backend.git"
   },
-  "keywords": [],
-  "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/fonsijr6/crm-fontanero-backend/issues"
+  "author": "Alfonso Ondo Nguema Avomo",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon ."
   },
-  "homepage": "https://github.com/fonsijr6/crm-fontanero-backend#readme"
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "mongoose": "^9.1.5"
+  }
 }
