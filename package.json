@@ -13,7 +13,7 @@
   "license": "ISC",
   "author": "Alfonso Ondo Nguema Avomo",
   "type": "commonjs",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "dev": "nodemon ."
   },
