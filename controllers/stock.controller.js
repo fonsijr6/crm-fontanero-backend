@@ -6,7 +6,7 @@ const stockService = require('../services/stock.service');
  * Crear material
  * POST /stock
  */
-exports.create = async(async (req, res) => {
+exports.create = async(req, res) => {
   try {
     const item = await stockService.createItem(
       req.user.id,
@@ -16,26 +16,26 @@ exports.create = async(async (req, res) => {
   } catch (error) {
     res.status(400).json({ message: 'Error al crear material' });
   }
-});
+};
 
 /**
  *Listar stock del fontanero autenticado
  * GET /stock
  */
-exports.getAll = async(async (req, res) => {
+exports.getAll = async(req, res) => {
   try {
     const item = await stockService.getItems(req.user.id);
     res.status(201).json(item)
   } catch (error) {
     res.status(500).json({ message: 'Error al obtener clientes' });
   }
-});
+};
 
 /**
  *Obtener un material
  * GET /stock/:id
  */
-exports.getOne = async(async (req, res) => {
+exports.getOne = async(req, res) => {
   try {
     const item = await stockService.getItemById(req.user.id, req.params.id);
     if (!item) {
@@ -45,13 +45,13 @@ exports.getOne = async(async (req, res) => {
   } catch (error) {
     res.status(400).json({ message: 'ID de material inválido' });
   }
-});
+};
 
 /**
  *Actualizar material
  * PUT /stock/:id
  */
-exports.update = async(async (req, res) => {
+exports.update = async(req, res) => {
   try {
     const item = await stockService.updateItem(
       req.user.id, 
@@ -65,13 +65,13 @@ exports.update = async(async (req, res) => {
   } catch (error) {
     res.status(400).json({ message: 'Error al actualizar el material' });
   }
-});
+};
 
 /**
  *Eliminar material
  * DELETE /stock/:id
  */
-exports.remove = async(async (req, res) => {
+exports.remove = async(req, res) => {
   try {
     const item = await stockService.deleteItem(
       req.user.id, 
@@ -84,5 +84,5 @@ exports.remove = async(async (req, res) => {
   } catch (error) {
     res.status(400).json({ message: 'Error al eliminar el material' });
   }
-});
+};
 

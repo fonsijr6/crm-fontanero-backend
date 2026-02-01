@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../controllers/stock.controller');
-const auth = require('../middleware/auth.mw')
+const {auth} = require('../middleware/auth.mw')
 
 router.use(auth);
 
