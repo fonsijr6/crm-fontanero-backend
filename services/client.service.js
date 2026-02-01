@@ -1,38 +1,49 @@
-const {Client} = require('../models/Client');
+const Client = require('../models/Client');
 
-async function createClient(ownerId, data) {
-  return Client.create({ ownerId, ...data });
+// =============== Crear cliente ================== //
+exports.createClient = async(userId, data) => {
+  return Client.create({ 
+    userId,
+    name: data.name,
+    surname1: data.surname1,
+    surname2: data.surname2,
+    address: data.address,
+    phone: data.phone,
+    notes: data.notes
+  });
 }
 
-async function listClientsByOwner(ownerId) {
-  return Client.find({ ownerId }).sort({ createdAt: -1 }).limit(50).lean();
+// =============== Obtener todos los clientes del usuario ================== //
+exports.getClients = async(userId) => {
+  return Client.find({ userId }).sort({createdAt: -1});
 }
 
-async function updateClientByOwner(id, ownerId, data) {
-  const allowed = ['name', 'phone', 'address', 'notes'];
-  const payload = Object.fromEntries(
-    Object.entries(data).filter(([k, v]) => allowed.includes(k) && v !== undefined)
-  );
+// =============== Obtener un cliente por ID ================== //
+exports.getClientById = async(userId, clientId) => {
+  return Client.findOne({
+    _id: clientId,
+    userId
+  });
+}
 
+// =============== Actualizar cliente ================== //
+exports.updateClient = async(userId, clientId, data) => {
   return Client.findOneAndUpdate(
-    { _id: id, ownerId },
-    payload,
-    { new: true, runValidators: true }
-  ).lean();
+    { _id: clientId, userId },
+    {
+      name: data.name,
+      surname1: data.surname1,
+      surname2: data.surname2,
+      address: data.address,
+      phone: data.phone,
+      notes: data.notes
+    },
+    { new: true }
+  );
 }
 
-async function getClientByOwner(id, ownerId) {
-  return Client.findOne({ _id: id, ownerId }).lean();
+// =============== Eliminar cliente ================== //
+exports.deleteClient = async(userId, clientId) => {
+  return Client.findOneAndDelete({ _id: clientId, userId });
 }
 
-async function deleteClientByOwner(id, ownerId) {
-  return Client.findOneAndDelete({ _id: id, ownerId }).lean();
-}
-
-module.exports = {
-  createClient,
-  listClientsByOwner,
-  updateClientByOwner,
-  getClientByOwner,
-  deleteClientByOwner
-};

@@ -1,8 +1,10 @@
 const mongoose = require('mongoose');
 
 const clientSchema = new mongoose.Schema({
-  ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },
   name: { type: String, required: true },
+  surname1: {type: String, required: true},
+  surname2: {type: String},
   phone: { type: String },
   address: { type: String },
   notes: { type: String }

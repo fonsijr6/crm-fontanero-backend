@@ -13,8 +13,9 @@ app.use(cors());
 app.use(express.json()); // Habilitamos que se puedan enviar json a nuestra aplicación
 
 
-app.use('/api/user', require('./routes/user'));
+app.use('/api/auth', require('./routes/auth'));
 app.use('/api/clients', require('./routes/client'));
+app.use('/api/stock', require('./routes/stock'))
 
 app.use((err, req, res, next) => {
   if (err?.type === 'entity.parse.failed') {
