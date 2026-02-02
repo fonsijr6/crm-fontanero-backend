@@ -6,6 +6,7 @@ const {auth} = require('../middleware/auth.mw')
 // api/auth
 router.post('/register', controller.register);
 router.post('/login', controller.login);
+router.post('/logout', controller.logout);
 router.post('/refresh', controller.refresh);
 router.get('/me', auth, controller.me);
 
