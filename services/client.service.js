@@ -21,15 +21,15 @@ exports.getClients = async(userId) => {
 // =============== Obtener un cliente por ID ================== //
 exports.getClientById = async(userId, clientId) => {
   return Client.findOne({
+    userId,
     _id: clientId,
-    userId
-  });
+  }).lean();
 }
 
 // =============== Actualizar cliente ================== //
 exports.updateClient = async(userId, clientId, data) => {
   return Client.findOneAndUpdate(
-    { _id: clientId, userId },
+    { userId, _id: clientId },
     {
       name: data.name,
       surname1: data.surname1,
@@ -44,6 +44,6 @@ exports.updateClient = async(userId, clientId, data) => {
 
 // =============== Eliminar cliente ================== //
 exports.deleteClient = async(userId, clientId) => {
-  return Client.findOneAndDelete({ _id: clientId, userId });
+  return Client.findOneAndDelete({ userId, _id: clientId });
 }
 
