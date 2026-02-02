@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db');
 
 // Creamos el servidor
@@ -8,7 +9,17 @@ const PORT = 4000;
 
 // Conectamos a la BD
 connectDB();
-app.use(cors());
+
+// CORS permitido
+app.use(cors({
+  origin: 'http://localhost:4200',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+app.use(cookieParser());
+
 
 app.use(express.json()); // Habilitamos que se puedan enviar json a nuestra aplicación
 
