@@ -15,7 +15,7 @@ exports.createClient = async(userId, data) => {
 
 // =============== Obtener todos los clientes del usuario ================== //
 exports.getClients = async(userId) => {
-  return Client.find({ userId }).sort({createdAt: -1});
+  return Client.find({ userId }).sort({createdAt: -1}).lean({ virtuals: true });
 }
 
 // =============== Obtener un cliente por ID ================== //
@@ -23,7 +23,7 @@ exports.getClientById = async(userId, clientId) => {
   return Client.findOne({
     userId,
     _id: clientId,
-  }).lean();
+  }).lean({ virtuals: true });
 }
 
 // =============== Actualizar cliente ================== //
@@ -39,7 +39,7 @@ exports.updateClient = async(userId, clientId, data) => {
       notes: data.notes
     },
     { new: true }
-  );
+  ).lean({ virtuals: true });
 }
 
 // =============== Eliminar cliente ================== //
