@@ -13,7 +13,7 @@ exports.createItem = async(userId, data) => {
 
 // =============== Obtener todo el stock del usuario ================== //
 exports.getItems = async(userId) => {
-  return StockItem.find({ userId }).sort({createdAt: -1});
+  return StockItem.find({ userId }).sort({createdAt: -1}).lean({ virtuals: true });
 }
 
 // =============== Obtener material por ID ================== //
@@ -21,7 +21,7 @@ exports.getItemById = async(userId, itemId) => {
   return StockItem.findOne({
     _id: itemId,
     userId
-  });
+  }).lean({ virtuals: true });
 }
 
 // =============== Actualizar material ================== //
@@ -35,7 +35,7 @@ exports.updateItem = async(userId, itemId, data) => {
       vanUnits: data.vanUnits
     },
     { new: true }
-  );
+  ).lean({ virtuals: true });
 }
 
 // =============== Eliminar material ================== //
