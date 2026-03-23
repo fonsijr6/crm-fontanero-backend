@@ -3,176 +3,148 @@ const clientService = require('../services/client.service');
 const mongoose = require('mongoose');
 
 /**
- * Crear cliente
+ * Create client
  * POST /clients
  */
 exports.create = async (req, res) => {
   try {
-    if (!req.user?.id) {
-      return res.status(401).json({ message: 'No autorizado' });
-    }
+    if (!req.user?.id) return res.status(401).json({ message: 'Unauthorized' });
 
-    const { name, surname1, surname2, phone, address, notes } = req.body || {};
+    const { name, phone, email, address, notes } = req.body || {};
 
-    // Validación básica
     const errors = [];
-    if (!name || typeof name !== 'string') errors.push('Nombre es obligatorio y debe ser string');
-    if (!surname1 || typeof surname1 !== 'string') errors.push('Apellido 1 es obligatorio y debe ser string');
-    if (surname2 !== undefined && typeof surname2 !== 'string') errors.push('Apelido 2 debe ser string si se envía');
-    if (!phone || typeof phone !== 'string') errors.push('Telefono es obligatorio y debe ser string');
-    if (!address || typeof address !== 'string') errors.push('Direccion es obligatorio y debe ser string');
-    if (notes !== undefined && typeof notes !== 'string') errors.push('Notas debe ser string si se envía');
+    if (!name || typeof name !== 'string') errors.push('Name is required and must be a string');
+    if (!phone || typeof phone !== 'string') errors.push('Phone is required and must be a string');
+    if (!email || typeof email !== 'string') errors.push('Email is required and must be a string');
+    if (!address || typeof address !== 'string') errors.push('Address is required and must be a string');
+    if (notes !== undefined && typeof notes !== 'string') errors.push('Notes must be a string if provided');
 
-    if (errors.length) {
-      return res.status(400).json({ message: 'Datos inválidos', errors });
-    }
+    if (errors.length) return res.status(400).json({ message: 'Invalid data', errors });
 
     const payload = {
       name: name.trim(),
-      surname1: surname1.trim(),
-      surname2: surname2?.trim(),
       phone: phone.trim(),
+      email: email.trim(),
       address: address.trim(),
-      notes: notes?.trim()
+      notes: notes?.trim(),
     };
 
     const client = await clientService.createClient(req.user.id, payload);
     return res.status(201).json(client);
+
   } catch (error) {
-    // Duplicados, validaciones de mongoose, etc.
     if (error?.status === 409 || error?.message === 'CLIENT_EXISTS') {
-      return res.status(409).json({ message: 'Cliente ya existe' });
+      return res.status(409).json({ message: 'Client already exists' });
     }
     if (error?.name === 'ValidationError') {
-      return res.status(400).json({ message: 'Validación fallida', details: error.errors });
+      return res.status(400).json({ message: 'Validation failed', details: error.errors });
     }
-    console.error('Error al crear cliente:', error);
-    return res.status(500).json({ message: 'Error al crear cliente' });
+    console.error('Error creating client:', error);
+    return res.status(500).json({ message: 'Error creating client' });
   }
 };
 
 /**
- * Listar clientes del fontanero autenticado
+ * Get all clients for the authenticated user
  * GET /clients
  */
 exports.getAll = async (req, res) => {
   try {
-    if (!req.user?.id) {
-      return res.status(401).json({ message: 'No autorizado' });
-    }
+    if (!req.user?.id) return res.status(401).json({ message: 'Unauthorized' });
 
     const clients = await clientService.getClients(req.user.id);
     return res.status(200).json(clients);
   } catch (error) {
-    console.error('Error al obtener clientes:', error);
-    return res.status(500).json({ message: 'Error al obtener clientes' });
+    console.error('Error fetching clients:', error);
+    return res.status(500).json({ message: 'Error fetching clients' });
   }
 };
 
 /**
- * Obtener un cliente
+ * Get a single client by ID
  * GET /clients/:id
  */
 exports.getOne = async (req, res) => {
   try {
-    if (!req.user?.id) {
-      return res.status(401).json({ message: 'No autorizado' });
-    }
+    if (!req.user?.id) return res.status(401).json({ message: 'Unauthorized' });
 
     const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: 'ID de cliente inválido' });
-    }
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ message: 'Invalid client ID' });
 
-    const client = await clientService.getClientById(req.user.id,id);
-    if (!client) {
-      return res.status(404).json({ message: 'Cliente no encontrado' });
-    }
+    const client = await clientService.getClientById(req.user.id, id);
+    if (!client) return res.status(404).json({ message: 'Client not found' });
+
     return res.json(client);
   } catch (error) {
-    console.error('Error al obtener cliente:', error);
-    return res.status(500).json({ message: 'Error al obtener cliente' });
+    console.error('Error fetching client:', error);
+    return res.status(500).json({ message: 'Error fetching client' });
   }
 };
 
 /**
- * Actualizar cliente
+ * Update client
  * PUT /clients/:id
  */
 exports.update = async (req, res) => {
   try {
-    if (!req.user?.id) {
-      return res.status(401).json({ message: 'No autorizado' });
-    }
+    if (!req.user?.id) return res.status(401).json({ message: 'Unauthorized' });
 
     const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: 'ID de cliente inválido' });
-    }
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ message: 'Invalid client ID' });
 
-    const { name, surname1, surname2, phone, address, notes } = req.body || {};
+    const { name, phone, email, address, notes } = req.body || {};
     const errors = [];
 
-    // Permitimos parciales, pero validamos tipos si vienen
-    if (name !== undefined && typeof name !== 'string') errors.push('name debe ser string');
-    if (surname1 !== undefined && typeof surname1 !== 'string') errors.push('surname1 debe ser string');
-    if (surname2 !== undefined && typeof surname2 !== 'string') errors.push('surname2 debe ser string');
-    if (phone !== undefined && typeof phone !== 'string') errors.push('phone debe ser string');
-    if (address !== undefined && typeof address !== 'string') errors.push('address debe ser string');
-    if (notes !== undefined && typeof notes !== 'string') errors.push('notes debe ser string');
+    if (name !== undefined && typeof name !== 'string') errors.push('name must be string');
+    if (phone !== undefined && typeof phone !== 'string') errors.push('phone must be string');
+    if (email !== undefined && typeof email !== 'string') errors.push('email must be string');
+    if (address !== undefined && typeof address !== 'string') errors.push('address must be string');
+    if (notes !== undefined && typeof notes !== 'string') errors.push('notes must be string');
 
-    if (errors.length) {
-      return res.status(400).json({ message: 'Datos inválidos', errors });
-    }
+    if (errors.length) return res.status(400).json({ message: 'Invalid data', errors });
 
     const payload = {
       ...(name !== undefined && { name: name.trim() }),
-      ...(surname1 !== undefined && { surname1: surname1.trim() }),
-      ...(surname2 !== undefined && { surname2: surname2.trim() }),
       ...(phone !== undefined && { phone: phone.trim() }),
+      ...(email !== undefined && { email: email.trim() }),
       ...(address !== undefined && { address: address.trim() }),
-      ...(notes !== undefined && { notes: notes.trim() })
+      ...(notes !== undefined && { notes: notes.trim() }),
     };
 
     const client = await clientService.updateClient(req.user.id, id, payload);
-    if (!client) {
-      return res.status(404).json({ message: 'Cliente no encontrado' });
-    }
+    if (!client) return res.status(404).json({ message: 'Client not found' });
+
     return res.json(client);
+
   } catch (error) {
     if (error?.status === 409 || error?.message === 'CLIENT_EXISTS') {
-      return res.status(409).json({ message: 'Ya existe un cliente con esos datos' });
+      return res.status(409).json({ message: 'Client with these details already exists' });
     }
     if (error?.name === 'ValidationError') {
-      return res.status(400).json({ message: 'Validación fallida', details: error.errors });
+      return res.status(400).json({ message: 'Validation failed', details: error.errors });
     }
-    console.error('Error al actualizar cliente:', error);
-    return res.status(500).json({ message: 'Error al actualizar cliente' });
+    console.error('Error updating client:', error);
+    return res.status(500).json({ message: 'Error updating client' });
   }
 };
 
 /**
- * Eliminar cliente
+ * Delete client
  * DELETE /clients/:id
  */
 exports.remove = async (req, res) => {
   try {
-    if (!req.user?.id) {
-      return res.status(401).json({ message: 'No autorizado' });
-    }
+    if (!req.user?.id) return res.status(401).json({ message: 'Unauthorized' });
 
     const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: 'ID de cliente inválido' });
-    }
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ message: 'Invalid client ID' });
 
     const client = await clientService.deleteClient(req.user.id, id);
-    if (!client) {
-      return res.status(404).json({ message: 'Cliente no encontrado' });
-    }
+    if (!client) return res.status(404).json({ message: 'Client not found' });
+
     return res.sendStatus(204);
   } catch (error) {
-    console.error('Error al eliminar cliente:', error);
-    return res.status(500).json({ message: 'Error al eliminar cliente' });
+    console.error('Error deleting client:', error);
+    return res.status(500).json({ message: 'Error deleting client' });
   }
 };

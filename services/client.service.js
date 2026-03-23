@@ -1,49 +1,47 @@
 const Client = require('../models/Client');
 
-// =============== Crear cliente ================== //
-exports.createClient = async(userId, data) => {
-  return Client.create({ 
+// =============== Create client ================== //
+exports.createClient = async (userId, data) => {
+  return Client.create({
     userId,
     name: data.name,
     surname1: data.surname1,
     surname2: data.surname2,
-    address: data.address,
     phone: data.phone,
-    notes: data.notes
+    address: data.address,
+    notes: data.notes,
   });
-}
+};
 
-// =============== Obtener todos los clientes del usuario ================== //
-exports.getClients = async(userId) => {
-  return Client.find({ userId }).sort({createdAt: -1}).lean({ virtuals: true });
-}
+// =============== Get all clients of user ================== //
+exports.getClients = async (userId) => {
+  return Client.find({ userId })
+    .sort({ createdAt: -1 })
+    .lean({ virtuals: true });
+};
 
-// =============== Obtener un cliente por ID ================== //
-exports.getClientById = async(userId, clientId) => {
-  return Client.findOne({
-    userId,
-    _id: clientId,
-  }).lean({ virtuals: true });
-}
+// =============== Get client by ID ================== //
+exports.getClientById = async (userId, clientId) => {
+  return Client.findOne({ userId, _id: clientId }).lean({ virtuals: true });
+};
 
-// =============== Actualizar cliente ================== //
-exports.updateClient = async(userId, clientId, data) => {
+// =============== Update client ================== //
+exports.updateClient = async (userId, clientId, data) => {
   return Client.findOneAndUpdate(
     { userId, _id: clientId },
     {
-      name: data.name,
-      surname1: data.surname1,
-      surname2: data.surname2,
-      address: data.address,
-      phone: data.phone,
-      notes: data.notes
+      ...(data.name && { name: data.name }),
+      ...(data.surname1 && { surname1: data.surname1 }),
+      ...(data.surname2 && { surname2: data.surname2 }),
+      ...(data.phone && { phone: data.phone }),
+      ...(data.address && { address: data.address }),
+      ...(data.notes && { notes: data.notes }),
     },
     { new: true }
   ).lean({ virtuals: true });
-}
+};
 
-// =============== Eliminar cliente ================== //
-exports.deleteClient = async(userId, clientId) => {
+// =============== Delete client ================== //
+exports.deleteClient = async (userId, clientId) => {
   return Client.findOneAndDelete({ userId, _id: clientId });
-}
-
+};
