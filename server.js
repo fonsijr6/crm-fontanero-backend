@@ -12,7 +12,7 @@ connectDB();
 
 // CORS permitido
 app.use(cors({
-  origin: 'http://localhost:4200',
+  origin: 'http://localhost:8080',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -27,7 +27,7 @@ app.use(express.json()); // Habilitamos que se puedan enviar json a nuestra apli
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/clients', require('./routes/client'));
 app.use('/api/stock', require('./routes/stock'))
-app.use('/api/stock', require('./routes/task'))
+app.use('/api/tasks', require('./routes/task'))
 
 app.use((err, req, res, next) => {
   if (err?.type === 'entity.parse.failed') {
