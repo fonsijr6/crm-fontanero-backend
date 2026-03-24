@@ -2,6 +2,14 @@
 const authService = require('../services/auth.service');
 const isProd = process.env.NODE_ENV === 'production';
 
+const cookieOptions = {
+  httpOnly: true,
+  secure: isProd ? true : false,
+  sameSite: isProd ? 'none' : 'lax',
+  path: '/api/auth',
+  maxAge: 7 * 24 * 60 * 60 * 1000
+};
+
 exports.refresh = async (req, res) => {
   try {
     const refreshToken = req.cookies?.rt;
@@ -25,14 +33,6 @@ exports.refresh = async (req, res) => {
   } catch (err) {
     return res.status(401).json({ msg: 'Refresh token inválido' });
   }
-};
-
-const cookieOptions = {
-  httpOnly: true,
-  secure: isProd ? true : false,
-  sameSite: isProd ? 'none' : 'lax',
-  path: '/api/auth',
-  maxAge: 7 * 24 * 60 * 60 * 1000
 };
 
 // =============== LOGIN ================= //

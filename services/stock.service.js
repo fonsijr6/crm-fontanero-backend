@@ -1,43 +1,46 @@
+// services/stock.service.js
 const StockItem = require('../models/Stock');
 
-// =============== Create stock item ================== //
+// ✅ CREATE STOCK ITEM
 exports.createItem = async (userId, data) => {
   return StockItem.create({
     userId,
     name: data.name,
-    typeMaterial: data.typeMaterial,
-    warehouseUnits: data.warehouseUnits ?? 0,
-    vanUnits: data.vanUnits ?? 0,
+    category: data.category,
+    quantity: data.quantity ?? 0,
+    unit: data.unit ?? "",
+    unitPrice: data.unitPrice ?? 0,
+    minStock: data.minStock ?? 0,
   });
 };
 
-// =============== Get all stock items of user ================== //
+// ✅ GET ALL STOCK ITEMS
 exports.getItems = async (userId) => {
-  return StockItem.find({ userId })
-    .sort({ createdAt: -1 })
-    .lean({ virtuals: true });
+  return StockItem.find({ userId }).sort({ createdAt: -1 });
 };
 
-// =============== Get stock item by ID ================== //
+// ✅ GET STOCK ITEM BY ID
 exports.getItemById = async (userId, itemId) => {
-  return StockItem.findOne({ userId, _id: itemId }).lean({ virtuals: true });
+  return StockItem.findOne({ userId, _id: itemId });
 };
 
-// =============== Update stock item ================== //
+// ✅ UPDATE STOCK ITEM
 exports.updateItem = async (userId, itemId, data) => {
   return StockItem.findOneAndUpdate(
     { userId, _id: itemId },
     {
-      ...(data.name && { name: data.name }),
-      ...(data.typeMaterial && { typeMaterial: data.typeMaterial }),
-      ...(data.warehouseUnits !== undefined && { warehouseUnits: data.warehouseUnits }),
-      ...(data.vanUnits !== undefined && { vanUnits: data.vanUnits }),
+      ...(data.name !== undefined && { name: data.name }),
+      ...(data.category !== undefined && { category: data.category }),
+      ...(data.quantity !== undefined && { quantity: data.quantity }),
+      ...(data.unit !== undefined && { unit: data.unit }),
+      ...(data.unitPrice !== undefined && { unitPrice: data.unitPrice }),
+      ...(data.minStock !== undefined && { minStock: data.minStock }),
     },
     { new: true }
-  ).lean({ virtuals: true });
+  );
 };
 
-// =============== Delete stock item ================== //
+// ✅ DELETE STOCK ITEM
 exports.deleteItem = async (userId, itemId) => {
   return StockItem.findOneAndDelete({ userId, _id: itemId });
 };

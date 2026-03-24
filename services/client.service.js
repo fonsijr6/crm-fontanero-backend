@@ -5,8 +5,7 @@ exports.createClient = async (userId, data) => {
   return Client.create({
     userId,
     name: data.name,
-    surname1: data.surname1,
-    surname2: data.surname2,
+    email: data.email,
     phone: data.phone,
     address: data.address,
     notes: data.notes,
@@ -16,13 +15,12 @@ exports.createClient = async (userId, data) => {
 // =============== Get all clients of user ================== //
 exports.getClients = async (userId) => {
   return Client.find({ userId })
-    .sort({ createdAt: -1 })
-    .lean({ virtuals: true });
+    .sort({ createdAt: -1 });
 };
 
 // =============== Get client by ID ================== //
 exports.getClientById = async (userId, clientId) => {
-  return Client.findOne({ userId, _id: clientId }).lean({ virtuals: true });
+  return Client.findOne({ userId, _id: clientId });
 };
 
 // =============== Update client ================== //
@@ -31,14 +29,13 @@ exports.updateClient = async (userId, clientId, data) => {
     { userId, _id: clientId },
     {
       ...(data.name && { name: data.name }),
-      ...(data.surname1 && { surname1: data.surname1 }),
-      ...(data.surname2 && { surname2: data.surname2 }),
+      ...(data.email && { email: data.email }),
       ...(data.phone && { phone: data.phone }),
       ...(data.address && { address: data.address }),
       ...(data.notes && { notes: data.notes }),
     },
     { new: true }
-  ).lean({ virtuals: true });
+  );
 };
 
 // =============== Delete client ================== //

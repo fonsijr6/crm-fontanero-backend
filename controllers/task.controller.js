@@ -19,7 +19,8 @@ exports.create = async (req, res) => {
     if (!description || typeof description !== 'string') errors.push('Description is required and must be string');
     if (!date || typeof date !== 'string') errors.push('Date is required and must be string');
     if (!time || typeof time !== 'string') errors.push('Time is required and must be string');
-    if (!status || !['pending', 'in_progress', 'completed'].includes(status)) errors.push('Status must be pending, in_progress or completed');
+    if (!status || !['pending', 'in_progress', 'completed'].includes(status))
+      errors.push('Status must be pending, in_progress or completed');
 
     if (errors.length) return res.status(400).json({ message: 'Invalid data', errors });
 
@@ -34,16 +35,27 @@ exports.create = async (req, res) => {
   }
 };
 
+
 /**
- * Get all tasks
+ * ✅ FIX: Get all tasks (clientId is OPTIONAL now)
  * GET /tasks
  */
 exports.getAll = async (req, res) => {
   try {
     if (!req.user?.id) return res.status(401).json({ message: 'Unauthorized' });
 
-    const clientId = req.query.clientId;
-    const tasks = await taskService.getTasks(req.user.id, clientId);
+    const clientId = req.query.clientId; // puede ser undefined
+
+    let tasks;
+
+    if (clientId && mongoose.Types.ObjectId.isValid(clientId)) {
+      // ✅ Filtrar por cliente si viene en la query
+      tasks = await taskService.getTasks(req.user.id, clientId);
+    } else {
+      // ✅ Si no hay clientId → devolver todas las tareas del usuario
+      tasks = await taskService.getTasks(req.user.id);
+    }
+
     return res.status(200).json(tasks);
 
   } catch (error) {
@@ -51,6 +63,7 @@ exports.getAll = async (req, res) => {
     return res.status(500).json({ message: 'Error fetching tasks' });
   }
 };
+
 
 /**
  * Get task by ID
@@ -74,6 +87,7 @@ exports.getOne = async (req, res) => {
   }
 };
 
+
 /**
  * Update task
  * PUT /tasks/:id
@@ -88,13 +102,17 @@ exports.update = async (req, res) => {
     const { clientId, clientName, address, description, date, time, status } = req.body || {};
     const errors = [];
 
-    if (clientId !== undefined && !mongoose.Types.ObjectId.isValid(clientId)) errors.push('clientId must be valid ObjectId');
-    if (clientName !== undefined && typeof clientName !== 'string') errors.push('clientName must be string');
+    if (clientId !== undefined && !mongoose.Types.ObjectId.isValid(clientId))
+      errors.push('clientId must be valid ObjectId');
+    if (clientName !== undefined && typeof clientName !== 'string')
+      errors.push('clientName must be string');
     if (address !== undefined && typeof address !== 'string') errors.push('address must be string');
-    if (description !== undefined && typeof description !== 'string') errors.push('description must be string');
+    if (description !== undefined && typeof description !== 'string')
+      errors.push('description must be string');
     if (date !== undefined && typeof date !== 'string') errors.push('date must be string');
     if (time !== undefined && typeof time !== 'string') errors.push('time must be string');
-    if (status !== undefined && !['pending', 'in_progress', 'completed'].includes(status)) errors.push('status must be pending, in_progress or completed');
+    if (status !== undefined && !['pending', 'in_progress', 'completed'].includes(status))
+      errors.push('status must be pending, in_progress or completed');
 
     if (errors.length) return res.status(400).json({ message: 'Invalid data', errors });
 
@@ -118,6 +136,7 @@ exports.update = async (req, res) => {
     return res.status(500).json({ message: 'Error updating task' });
   }
 };
+
 
 /**
  * Delete task

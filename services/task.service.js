@@ -6,8 +6,7 @@ exports.getTasks = async (userId, clientId) => {
   if (clientId) filter.clientId = clientId;  // agregamos filtro si se pasa clientId
 
   return Task.find(filter)
-    .sort({ date: 1, time: 1 })
-    .lean({ virtuals: true });
+    .sort({ date: 1, time: 1 });
 };
 
 // Los demás métodos se mantienen igual
@@ -16,7 +15,7 @@ exports.createTask = async (userId, data) => {
 };
 
 exports.getTaskById = async (userId, taskId) => {
-  return Task.findOne({ userId, _id: taskId }).lean({ virtuals: true });
+  return Task.findOne({ userId, _id: taskId });
 };
 
 exports.updateTask = async (userId, taskId, data) => {
@@ -24,7 +23,7 @@ exports.updateTask = async (userId, taskId, data) => {
     { userId, _id: taskId },
     { ...data },
     { new: true }
-  ).lean({ virtuals: true });
+  );
 };
 
 exports.deleteTask = async (userId, taskId) => {
