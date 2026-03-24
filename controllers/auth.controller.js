@@ -7,7 +7,7 @@ const cookieOptions = {
   secure: isProd ? true : false,
   sameSite: isProd ? 'none' : 'lax',
   path: '/api/auth',
-  maxAge: 7 * 24 * 60 * 60 * 1000
+  maxAge: 30 * 24 * 60 * 60 * 1000
 };
 
 exports.refresh = async (req, res) => {
@@ -24,7 +24,7 @@ exports.refresh = async (req, res) => {
     res.cookie('rt', newRefreshToken, {
       httpOnly: true,
       sameSite: 'lax',
-      secure: false, 
+      secure: true, 
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
