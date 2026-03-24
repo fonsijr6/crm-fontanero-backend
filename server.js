@@ -15,7 +15,7 @@ app.use(cors({
 origin: [
     "http://localhost:8080",
     "http://localhost:5173",
-    "https://fonsi-plumbflow-crm.vercel.app"
+    "https://plumbflow-crm-fonsijr6s-projects.vercel.app"
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
