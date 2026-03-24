@@ -5,7 +5,6 @@ const connectDB = require('./config/db');
 
 // Creamos el servidor
 const app = express();
-const PORT = 4000;
 
 // Conectamos a la BD
 connectDB();
@@ -41,6 +40,6 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
-app.listen(PORT, () => {
+app.listen(process.env.PORT || 4000, () => {
     console.log('El servidor esta corriendo perfectamente')
 })
