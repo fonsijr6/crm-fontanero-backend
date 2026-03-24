@@ -23,6 +23,15 @@ origin: [
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      connectSrc: ["'self'", "https://fonsi-plumbflow-crm.up.railway.app"],
+    }
+  }
+}));
+
 app.use(cookieParser());
 
 
