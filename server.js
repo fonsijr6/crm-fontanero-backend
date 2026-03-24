@@ -48,8 +48,8 @@ app.use((err, req, res, next) => {
 });
 
 // ✅ 🚨 AQUÍ EL FIX REAL
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 8080;
 
-app.listen(PORT, () => {
-  console.log("✅ Servidor funcionando en puerto", PORT);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`✅ Servidor funcionando en puerto ${PORT}`);
 });
