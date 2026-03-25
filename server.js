@@ -41,6 +41,7 @@ app.use("/api/auth", require("./routes/auth"));
 app.use("/api/clients", require("./routes/client"));
 app.use("/api/stock", require("./routes/stock"));
 app.use("/api/tasks", require("./routes/task"));
+app.use("/api/invoices", require("./routes/invoice"));
 
 // ✅ Manejo JSON inválido
 app.use((err, req, res, next) => {
@@ -50,7 +51,7 @@ app.use((err, req, res, next) => {
 });
 
 // ✅ 🚨 AQUÍ EL FIX REAL
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`✅ Servidor funcionando en puerto ${PORT}`);
