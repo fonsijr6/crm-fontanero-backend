@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const invoiceController = require("../controllers/invoice.controller");
+const { auth } = require("../middleware/auth.mw");
 
 // ✅ Todas
 router.get("/", invoiceController.getInvoices);
