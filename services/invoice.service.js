@@ -1,6 +1,6 @@
-const Invoice = require("../models/Invoice");
 const nodemailer = require("nodemailer");
 const PDFDocument = require("pdfkit");
+const Invoice = require("../models/Invoice");
 
 /* ✅ GET ALL POR USUARIO */
 exports.findAll = (userId) => {
@@ -36,7 +36,7 @@ exports.remove = (userId, id) => {
   return Invoice.findOneAndDelete({ _id: id, userId });
 };
 
-/* ✅ Generación PDF (sin tocar) */
+/* ✅ Generación PDF COMPLETA (igual que tu versión original) */
 exports.generatePdf = async (invoice) => {
   return new Promise((resolve, reject) => {
     try {
@@ -46,31 +46,41 @@ exports.generatePdf = async (invoice) => {
       doc.on("data", (c) => chunks.push(c));
       doc.on("end", () => resolve(Buffer.concat(chunks)));
 
-      doc.fontSize(20).text(`Factura ${invoice.invoiceNumber}`);
+      // ✅ TÍTULO
+      doc.fontSize(20).text(`Factura ${invoice.invoiceNumber}`, { align: "left" });
       doc.moveDown();
 
+      // ✅ EMISOR
       doc.fontSize(12).text(`Emisor: ${invoice.issuerName}`);
       if (invoice.issuerNif) doc.text(`NIF: ${invoice.issuerNif}`);
       if (invoice.issuerAddress) doc.text(invoice.issuerAddress);
       doc.moveDown();
 
-      doc.text(`Cliente: ${invoice.clientName}`);
+      // ✅ CLIENTE
+      doc.fontSize(12).text(`Cliente: ${invoice.clientName}`);
       if (invoice.clientNif) doc.text(`NIF: ${invoice.clientNif}`);
       if (invoice.clientAddress) doc.text(invoice.clientAddress);
-
       doc.moveDown();
-      doc.text(`Fecha: ${new Date(invoice.date).toLocaleDateString("es-ES")}`);
-      if (invoice.dueDate)
-        doc.text(`Vencimiento: ${new Date(invoice.dueDate).toLocaleDateString("es-ES")}`);
 
-      doc.moveDown().text("Conceptos:").moveDown();
+      // ✅ FECHAS
+      doc.text(`Fecha emisión: ${new Date(invoice.date).toLocaleDateString("es-ES")}`);
+      if (invoice.dueDate) {
+        doc.text(
+          `Vencimiento: ${new Date(invoice.dueDate).toLocaleDateString("es-ES")}`
+        );
+      }
+      doc.moveDown();
+
+      // ✅ TABLA – LÍNEAS
+      doc.fontSize(12).text("Conceptos:");
+      doc.moveDown();
 
       const tableTop = doc.y;
-      const itemX = 50,
-        qtyX = 250,
-        priceX = 330,
-        taxX = 400,
-        totalX = 470;
+      const itemX = 50;
+      const qtyX = 250;
+      const priceX = 330;
+      const taxX = 400;
+      const totalX = 470;
 
       doc.font("Helvetica-Bold");
       doc.text("Descripción", itemX, tableTop);
@@ -92,13 +102,41 @@ exports.generatePdf = async (invoice) => {
       });
 
       doc.moveDown().moveDown();
-      doc.text(`Subtotal: ${invoice.subtotal.toFixed(2)} €`, { align: "right" });
-      doc.text(`IVA: ${invoice.taxTotal.toFixed(2)} €`, { align: "right" });
-      doc.text(`Total: ${invoice.total.toFixed(2)} €`, { align: "right" });
+
+      // ✅ TOTALES
+      doc.fontSize(12)
+        .text(`Subtotal: ${invoice.subtotal.toFixed(2)} €`, { align: "right" })
+        .text(`IVA: ${invoice.taxTotal.toFixed(2)} €`, { align: "right" })
+        .text(`Total: ${invoice.total.toFixed(2)} €`, { align: "right" });
 
       doc.end();
     } catch (err) {
       reject(err);
     }
+  });
+};
+
+/* ✅ ENVÍO DE EMAIL COMPLETO (igual que el original) */
+exports.sendEmail = async ({ to, replyTo, subject, pdfBuffer, filename }) => {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,   // ✅ Gmail del autónomo
+      pass: process.env.EMAIL_PASS,   // ✅ Contraseña de aplicación
+    },
+  });
+
+  return transporter.sendMail({
+    from: `Plumiks CRM <${process.env.EMAIL_USER}>`,
+    to,
+    replyTo,
+    subject,
+    text: "Adjuntamos su factura.",
+    attachments: [
+      {
+        filename,
+        content: pdfBuffer,
+      },
+    ],
   });
 };

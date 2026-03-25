@@ -72,3 +72,50 @@ exports.deleteInvoice = async (req, res) => {
     res.status(500).json({ msg: "Error al eliminar factura" });
   }
 };
+
+// ✅ Enviar factura por email
+exports.sendInvoiceEmail = async (req, res) => {
+  try {
+    // ✅ Buscar factura SOLO del usuario autenticado
+    const invoice = await invoiceService.findById(req.user.id, req.params.id);
+
+    if (!invoice) {
+      return res.status(404).json({ msg: "Factura no encontrada" });
+    }
+
+    // ✅ Validación importante
+    if (!invoice.clientEmail) {
+      return res
+        .status(400)
+        .json({ msg: "La factura no tiene clientEmail guardado" });
+    }
+
+    // ✅ Generar PDF
+    const pdfBuffer = await invoiceService.generatePdf(invoice);
+
+    // ✅ Email del cliente (destinatario real)
+    const to = invoice.clientEmail;
+
+    // ✅ Reply-To (email del autónomo)
+    const replyTo = invoice.issuerEmail;
+
+    // ✅ Enviar email
+    await invoiceService.sendEmail({
+      to,
+      replyTo,
+      subject: `Factura ${invoice.invoiceNumber}`,
+      pdfBuffer,
+      filename: `Factura-${invoice.invoiceNumber}.pdf`,
+    });
+
+    // ✅ Cambiar estado a "sent"
+    const updated = await invoiceService.update(req.user.id, invoice.id, {
+      status: "sent",
+    });
+
+    res.json({ success: true, invoice: updated });
+  } catch (err) {
+    console.error("❌ ERROR AL ENVIAR FACTURA:", err.message, err.stack);
+    res.status(500).json({ msg: "Error enviando la factura" });
+  }
+};
