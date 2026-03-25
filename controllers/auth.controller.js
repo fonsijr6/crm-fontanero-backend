@@ -35,39 +35,39 @@ exports.refresh = async (req, res) => {
   }
 };
 
-// =============== LOGIN ================= //
-exports.login = async (req, res) => {
-  try {
-    const { user, accessToken, refreshToken } = await authService.login(req.body);
-
-    res.cookie('refreshToken', refreshToken, cookieOptions);
-
-    return res.json({
-      user,
-      token: accessToken
-    });
-  } catch (e) {
-    return res.status(e.status || 401).json({ message: e.message });
-  }
-};
-
-// =============== REGISTER ================= //
+// ✅ REGISTER
 exports.register = async (req, res) => {
   try {
     const { user, accessToken, refreshToken } = await authService.register(req.body);
 
     res.cookie('refreshToken', refreshToken, cookieOptions);
 
-    return res.status(201).json({
+    res.status(201).json({
       user,
       token: accessToken
     });
   } catch (e) {
-    return res.status(e.status || 400).json({ message: e.message });
+    res.status(e.status || 400).json({ message: e.message });
   }
 };
 
-// =============== REFRESH ================= //
+// ✅ LOGIN
+exports.login = async (req, res) => {
+  try {
+    const { user, accessToken, refreshToken } = await authService.login(req.body);
+
+    res.cookie('refreshToken', refreshToken, cookieOptions);
+
+    res.json({
+      user,
+      token: accessToken
+    });
+  } catch (e) {
+    res.status(e.status || 401).json({ message: e.message });
+  }
+};
+
+// ✅ REFRESH
 exports.refresh = async (req, res) => {
   try {
     const oldToken = req.cookies.refreshToken;
@@ -76,37 +76,35 @@ exports.refresh = async (req, res) => {
 
     res.cookie('refreshToken', refreshToken, cookieOptions);
 
-    return res.json({ token: accessToken });
+    res.json({ token: accessToken });
   } catch (e) {
-    return res.status(e.status || 401).json({ message: e.message });
+    res.status(e.status || 401).json({ message: e.message });
   }
 };
 
-// =============== LOGOUT ================= //
+// ✅ LOGOUT
 exports.logout = async (req, res) => {
   try {
-    const rToken = req.cookies.refreshToken;
+    const oldToken = req.cookies.refreshToken;
 
-    await authService.logout(rToken);
+    await authService.logout(oldToken);
 
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      secure: isProd ? true : false,
-      sameSite: isProd ? 'none' : 'lax',
-      path: '/api/auth'
-    });
+    res.clearCookie('refreshToken', cookieOptions);
 
-    return res.json({ message: 'Logout correcto' });
+    res.json({ message: 'Logout correcto' });
   } catch (e) {
-    return res.status(500).json({ message: 'Error en logout' });
+    res.status(500).json({ message: 'Error en logout' });
   }
 };
 
-// =============== ME ================== //
+// ✅ ME (usuario logueado)
 exports.me = async (req, res) => {
-  res.json({ 
+  res.json({
     id: req.auth.id,
     name: req.user.name,
-    email: req.user.email
+    email: req.user.email,
+    issuerAddress: req.user.issuerAddress,
+    issuerNif: req.user.issuerNif,
+    issuerEmail: req.user.issuerEmail,
   });
-}
+};

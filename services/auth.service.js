@@ -1,10 +1,11 @@
+// services/auth.service.js
 const User = require('../models/User');
 const Session = require('../models/Session');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 // ================= REGISTER ================= //
-exports.register = async ({ name, email, password }) => {
+exports.register = async ({ name, email, password, issuerAddress, issuerNif, issuerEmail }) => {
   const exist = await User.findOne({ email }).lean();
   if (exist) {
     const err = new Error('EMAIL_EXISTS');
@@ -13,12 +14,19 @@ exports.register = async ({ name, email, password }) => {
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
-  const user = await User.create({ name, email, password: passwordHash });
+
+  const user = await User.create({
+    name,
+    email,
+    password: passwordHash,
+    issuerAddress: issuerAddress || "",
+    issuerNif: issuerNif || "",
+    issuerEmail: issuerEmail || email,
+  });
 
   const accessToken = createAccessToken(user.id);
   const refreshToken = createRefreshToken(user.id);
 
-  // Guardar refresh en BD (hash)
   await saveRefreshInDB(user.id, refreshToken);
 
   return {
@@ -59,19 +67,16 @@ exports.refreshTokens = async (tokenFromCookie) => {
     throw createError('INVALID_REFRESH_TOKEN');
   }
 
-  // Buscar sesión en BD
   const session = await Session.findOne({ userId: payload.id }).lean();
   if (!session) throw createError('SESSION_NOT_FOUND');
 
   const isMatch = await bcrypt.compare(tokenFromCookie, session.refreshTokenHash);
 
   if (!isMatch) {
-    // Detección de reuso → token comprometido
     await Session.deleteMany({ userId: payload.id });
     throw createError('TOKEN_REUSED');
   }
 
-  // Rotación: eliminar sesión vieja y crear una nueva
   await Session.deleteMany({ userId: payload.id });
 
   const newAccess = createAccessToken(payload.id);
@@ -93,7 +98,6 @@ exports.logout = async (refreshTokenFromCookie) => {
   try {
     payload = jwt.verify(refreshTokenFromCookie, process.env.JWT_REFRESH_SECRET);
   } catch {
-    // Incluso si el token expiró, borra la sesión
     return Session.deleteMany({ refreshTokenHash: { $exists: true } });
   }
 
@@ -135,6 +139,9 @@ function formatUser(user) {
   return {
     id: user.id,
     name: user.name,
-    email: user.email
+    email: user.email,
+    issuerAddress: user.issuerAddress || "",
+    issuerNif: user.issuerNif || "",
+    issuerEmail: user.issuerEmail || user.email,
   };
 }
