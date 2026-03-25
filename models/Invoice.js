@@ -4,11 +4,14 @@ const invoiceLineSchema = new mongoose.Schema({
   description: { type: String, required: true },
   quantity: { type: Number, required: true },
   unitPrice: { type: Number, required: true },
-  taxRate: { type: Number, required: true }
+  taxRate: { type: Number, required: true },
 });
 
 const invoiceSchema = new mongoose.Schema(
   {
+    /* ✅ MULTI-USUARIO REAL */
+    userId: { type: String, required: true },
+
     invoiceNumber: { type: String, required: true, unique: true },
 
     clientId: { type: String, required: true },
@@ -19,7 +22,7 @@ const invoiceSchema = new mongoose.Schema(
 
     issuerName: { type: String, required: true },
     issuerNif: { type: String, default: "" },
-    issuerEmail: { type: String, required: false },
+    issuerEmail: { type: String },
     issuerAddress: { type: String, default: "" },
 
     date: { type: Date, required: true },
@@ -37,12 +40,11 @@ const invoiceSchema = new mongoose.Schema(
 
     subtotal: { type: Number, required: true },
     taxTotal: { type: Number, required: true },
-    total: { type: Number, required: true }
+    total: { type: Number, required: true },
   },
   { timestamps: true }
 );
 
-/* ✅ TRANSFORMACIÓN PARA DEVOLVER id EN VEZ DE _id */
 invoiceSchema.method("toJSON", function () {
   const { __v, _id, ...object } = this.toObject({ virtuals: true });
   object.id = _id;
