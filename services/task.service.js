@@ -11,7 +11,7 @@ exports.getTasks = async (userId, clientId) => {
 
 // Los demás métodos se mantienen igual
 exports.createTask = async (userId, data) => {
-  return Task.create({ userId, ...data });
+  return Task.create({ userId, images: data.images || [], ...data });
 };
 
 exports.getTaskById = async (userId, taskId) => {
@@ -19,6 +19,10 @@ exports.getTaskById = async (userId, taskId) => {
 };
 
 exports.updateTask = async (userId, taskId, data) => {
+  // ✅ Sanitizar imágenes
+  if (data.images === null) delete data.images;
+  if (data.images && !Array.isArray(data.images)) delete data.images;
+
   return Task.findOneAndUpdate(
     { userId, _id: taskId },
     { ...data },

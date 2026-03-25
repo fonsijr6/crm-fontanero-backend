@@ -35,6 +35,11 @@ const taskSchema = new mongoose.Schema({
     type: String 
   },
 
+  images: {
+    type: [String], // array de URLs (Cloudinary)
+    default: [],
+  },
+
   status: {
     type: String,
     enum: ['pending', 'in_progress', 'completed'],
