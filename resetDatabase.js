@@ -30,19 +30,7 @@ async function resetDB() {
 
     const hashed = await bcrypt.hash("SuperAdmin123!", 10);
 
-    const User = mongoose.model(
-      "User",
-      new mongoose.Schema({
-        name: String,
-        email: String,
-        password: String,
-        role: String,
-        companyId: { type: mongoose.Schema.Types.ObjectId, default: null },
-        permissions: Object,
-        isActive: Boolean,
-        mustChangePassword: Boolean,
-      })
-    );
+    const User = require("./models/User");
 
     const superadmin = await User.create({
       name: "Super Admin",
@@ -57,7 +45,7 @@ async function resetDB() {
     console.log("✅ SUPERADMIN creado:");
     console.log({
       email: superadmin.email,
-      password: "superadmin",
+      password: "SuperAdmin123!",
     });
 
     console.log("\n🎉 Base de datos reinicializada correctamente.");

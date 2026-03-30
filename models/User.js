@@ -3,11 +3,11 @@ const mongoose = require("mongoose");
 const userSchema = new mongoose.Schema(
   {
     // 🔐 A qué empresa pertenece este usuario
+    
     companyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Company",
-      required: true,
-      index: true,
+      default: null,       // ✅ superadmin NO necesita empresa
     },
 
     // 👤 Identidad básica
