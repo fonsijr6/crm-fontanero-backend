@@ -20,9 +20,10 @@ module.exports.auth = async (req, res, next) => {
     // ✅ Decodifica token
     const payload = jwt.verify(token, secret);
 
-    const userId = payload.id ?? payload.sub;
+    const userId = payload.userId || payload.id || payload.sub;
+
     if (!userId) {
-      return res.status(401).json({ msg: "Token invalid (missing id)" });
+      return res.status(401).json({ msg: "Token inválido: falta userId." });
     }
 
     // ✅ Carga usuario real (sin password)
@@ -35,8 +36,11 @@ module.exports.auth = async (req, res, next) => {
     // ✅ Carga datos multi-empresa
     req.user = {
       userId: user._id,
-      companyId: user.companyId,   // ✅ clave en multi-tenant
-      role: user.role,             // ✅ roles (owner/admin/worker/viewer)
+      companyId: user.companyId,
+      role: user.role,
+      name: user.name,
+      email: user.email,
+      lastLoginAt: user.lastLoginAt,
     };
 
     req.auth = payload;

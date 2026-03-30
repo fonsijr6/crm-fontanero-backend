@@ -8,7 +8,7 @@ const cookieOptions = {
   httpOnly: true,
   secure: isProd ? true : false,
   sameSite: isProd ? "none" : "lax",
-  path: "/api/auth",
+  path: "/",
   maxAge: 30 * 24 * 60 * 60 * 1000, // 30 días
 };
 
@@ -46,12 +46,20 @@ exports.login = async (req, res) => {
     // ✅ Guardamos Refresh Token en cookie segura
     res.cookie("refreshToken", refreshToken, cookieOptions);
 
+    
     return res.json({
-      msg: "Inicio de sesión correcto",
-      token,
-      user,
-      requirePasswordChange,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        companyId: user.companyId,
+        permissions: user.permissions || {},
+        mustChangePassword: requirePasswordChange
+      },
+      token
     });
+
   } catch (e) {
     return res.status(e.status || 401).json({ msg: e.message });
   }
