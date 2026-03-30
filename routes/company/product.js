@@ -1,3 +1,10 @@
+const Product = require("../../models/Product");
+const controller = require("../../controllers/product.controller");
+
+const { auth } = require("../../middleware/auth.mw");
+const { requireRole } = require("../../middleware/requireRole");
+const { requireCompany } = require("../../middleware/requireCompany");
+
 router.post(
   "/",
   auth,

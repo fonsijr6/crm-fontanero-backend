@@ -7,12 +7,14 @@ const controller = require("../../controllers/invoice.controller");
 const { auth } = require("../../middleware/auth.mw");
 const { requireRole } = require("../../middleware/requireRole");
 const { requireCompany } = require("../../middleware/requireCompany");
+const { auditAction } = require("../../middleware/auditAction");
 
 // ✅ Crear factura (owner, admin)
 router.post(
   "/",
   auth,
   requireRole(["owner", "admin"]),
+  auditAction("Crear factura", "invoice"),
   controller.createInvoice
 );
 
@@ -39,6 +41,7 @@ router.put(
   auth,
   requireCompany(Invoice),
   requireRole(["owner", "admin"]),
+  auditAction("Actualizar factura", "invoice"),
   controller.updateInvoice
 );
 
@@ -48,6 +51,7 @@ router.put(
   auth,
   requireCompany(Invoice),
   requireRole(["owner", "admin"]),
+  auditAction("Cambiar estado factura", "invoice"),
   controller.updateInvoiceStatus
 );
 
@@ -57,6 +61,7 @@ router.delete(
   auth,
   requireCompany(Invoice),
   requireRole(["owner"]),
+  auditAction("Eliminar factura", "invoice"),
   controller.deleteInvoice
 );
 
