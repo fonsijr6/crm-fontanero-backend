@@ -85,7 +85,11 @@ const companySchema = new mongoose.Schema(
       invoicePrefix: { type: String, default: "FAC-" },
       quotePrefix: { type: String, default: "PRES-" },
       taskPrefix: { type: String, default: "TSK-" },
-    },
+
+      lastInvoiceNumber: { type: Number, default: 0 },
+      lastQuoteNumber: { type: Number, default: 0 },
+      lastTaskNumber: { type: Number, default: 0 }
+    }
   },
   { timestamps: true }
 );

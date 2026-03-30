@@ -1,35 +1,65 @@
-const Task = require('../models/Task');
+const Task = require("../models/Task");
 
-// Obtener todas las tareas del usuario, opcionalmente filtrando por cliente
-exports.getTasks = async (userId, clientId) => {
-  const filter = { userId };
-  if (clientId) filter.clientId = clientId;  // agregamos filtro si se pasa clientId
+module.exports = {
+  async createTask(companyId, userId, data) {
+    if (!companyId) throw new Error("La empresa es obligatoria.");
 
-  return Task.find(filter)
-    .sort({ date: 1, time: 1 });
-};
+    if (!data.title || data.title.trim().length === 0)
+      throw new Error("El título de la tarea es obligatorio.");
+    if (data.title.length > 80)
+      throw new Error("El título no puede superar los 80 caracteres.");
 
-// Los demás métodos se mantienen igual
-exports.createTask = async (userId, data) => {
-  return Task.create({ userId, images: data.images || [], ...data });
-};
+    if (data.description && data.description.length > 500)
+      throw new Error("La descripción no puede superar los 500 caracteres.");
 
-exports.getTaskById = async (userId, taskId) => {
-  return Task.findOne({ userId, _id: taskId });
-};
+    if (!data.clientId)
+      throw new Error("La tarea debe estar vinculada a un cliente.");
 
-exports.updateTask = async (userId, taskId, data) => {
-  // ✅ Sanitizar imágenes
-  if (data.images === null) delete data.images;
-  if (data.images && !Array.isArray(data.images)) delete data.images;
+    return await Task.create({
+      companyId,
+      createdBy: userId,
+      clientId: data.clientId,
+      assignedTo: data.assignedTo || null,
+      title: data.title.trim(),
+      description: data.description || "",
+      date: data.date,
+      time: data.time || "",
+      address: data.address?.trim() || "",
+      images: data.images || [],
+      status: "pending",
+      priority: data.priority || "medium",
+    });
+  },
 
-  return Task.findOneAndUpdate(
-    { userId, _id: taskId },
-    { ...data },
-    { new: true }
-  );
-};
+  async getTasks(companyId) {
+    return await Task.find({ companyId })
+      .populate("clientId assignedTo")
+      .sort({ date: 1 });
+  },
 
-exports.deleteTask = async (userId, taskId) => {
-  return Task.findOneAndDelete({ userId, _id: taskId });
+  async getTask(companyId, taskId) {
+    return await Task.findOne({ _id: taskId, companyId })
+      .populate("clientId assignedTo");
+  },
+
+  async updateTask(companyId, taskId, data) {
+    if (data.title && data.title.length > 80)
+      throw new Error("El título no puede superar los 80 caracteres.");
+
+    if (data.description && data.description.length > 500)
+      throw new Error("La descripción no puede superar los 500 caracteres.");
+
+    if (data.images && data.images.length > 20)
+      throw new Error("No puedes añadir más de 20 imágenes.");
+
+    return await Task.findOneAndUpdate(
+      { _id: taskId, companyId },
+      data,
+      { new: true }
+    );
+  },
+
+  async deleteTask(companyId, taskId) {
+    return await Task.deleteOne({ _id: taskId, companyId });
+  },
 };

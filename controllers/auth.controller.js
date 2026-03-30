@@ -1,13 +1,15 @@
 // controllers/auth.controller.js
-const authService = require('../services/auth.service');
-const isProd = process.env.NODE_ENV === 'production';
+const jwt = require("jsonwebtoken");
+const authService = require("../services/auth.service");
+const isProd = process.env.NODE_ENV === "production";
 
+// ✅ Configuración de cookies
 const cookieOptions = {
   httpOnly: true,
   secure: isProd ? true : false,
-  sameSite: isProd ? 'none' : 'lax',
-  path: '/api/auth',
-  maxAge: 30 * 24 * 60 * 60 * 1000
+  sameSite: isProd ? "none" : "lax",
+  path: "/api/auth",
+  maxAge: 30 * 24 * 60 * 60 * 1000, // 30 días
 };
 
 exports.refresh = async (req, res) => {
@@ -35,76 +37,114 @@ exports.refresh = async (req, res) => {
   }
 };
 
-// ✅ REGISTER
-exports.register = async (req, res) => {
-  try {
-    const { user, accessToken, refreshToken } = await authService.register(req.body);
-
-    res.cookie('refreshToken', refreshToken, cookieOptions);
-
-    res.status(201).json({
-      user,
-      token: accessToken
-    });
-  } catch (e) {
-    res.status(e.status || 400).json({ message: e.message });
-  }
-};
-
 // ✅ LOGIN
 exports.login = async (req, res) => {
   try {
-    const { user, accessToken, refreshToken } = await authService.login(req.body);
+    const { token, user, requirePasswordChange, refreshToken } =
+      await authService.login(req.body);
 
-    res.cookie('refreshToken', refreshToken, cookieOptions);
+    // ✅ Guardamos Refresh Token en cookie segura
+    res.cookie("refreshToken", refreshToken, cookieOptions);
 
-    res.json({
+    return res.json({
+      msg: "Inicio de sesión correcto",
+      token,
       user,
-      token: accessToken
+      requirePasswordChange,
     });
   } catch (e) {
-    res.status(e.status || 401).json({ message: e.message });
+    return res.status(e.status || 401).json({ msg: e.message });
   }
 };
 
-// ✅ REFRESH
+// ✅ REGISTER (si algún día quieres registro público; ahora no se usa)
+exports.register = async (req, res) => {
+  try {
+    const { user, token, refreshToken } = await authService.register(req.body);
+
+    res.cookie("refreshToken", refreshToken, cookieOptions);
+
+    return res.status(201).json({ user, token });
+  } catch (e) {
+    return res.status(e.status || 400).json({ msg: e.message });
+  }
+};
+
+// ✅ REFRESH TOKEN (muy importante para apps móviles y sesiones largas)
 exports.refresh = async (req, res) => {
   try {
     const oldToken = req.cookies.refreshToken;
 
-    const { accessToken, refreshToken } = await authService.refreshTokens(oldToken);
+    const { accessToken, refreshToken } =
+      await authService.refreshTokens(oldToken);
 
-    res.cookie('refreshToken', refreshToken, cookieOptions);
+    // ✅ Renovamos cookie
+    res.cookie("refreshToken", refreshToken, cookieOptions);
 
-    res.json({ token: accessToken });
+    return res.json({ token: accessToken });
   } catch (e) {
-    res.status(e.status || 401).json({ message: e.message });
+    return res.status(e.status || 401).json({ msg: e.message });
   }
 };
 
-// ✅ LOGOUT
+// ✅ LOGOUT (elimina cookie y revoca refresh token)
 exports.logout = async (req, res) => {
   try {
     const oldToken = req.cookies.refreshToken;
 
     await authService.logout(oldToken);
 
-    res.clearCookie('refreshToken', cookieOptions);
+    res.clearCookie("refreshToken", cookieOptions);
 
-    res.json({ message: 'Logout correcto' });
+    return res.json({ msg: "Logout correcto" });
   } catch (e) {
-    res.status(500).json({ message: 'Error en logout' });
+    return res.status(500).json({ msg: "Error en logout" });
   }
 };
 
-// ✅ ME (usuario logueado)
+// ✅ ME — Perfil del usuario autenticado
 exports.me = async (req, res) => {
-  res.json({
-    id: req.auth.id,
-    name: req.user.name,
-    email: req.user.email,
-    issuerAddress: req.user.issuerAddress,
-    issuerNif: req.user.issuerNif,
-    issuerEmail: req.user.issuerEmail,
-  });
+  try {
+    return res.json({
+      id: req.user.userId,
+      name: req.user.name,
+      email: req.user.email,
+      companyId: req.user.companyId,
+      role: req.user.role,
+      lastLoginAt: req.user.lastLoginAt,
+      lastActivityAt: req.user.lastActivityAt,
+    });
+  } catch (e) {
+    return res.status(400).json({ msg: e.message });
+  }
+};
+
+// ✅ CAMBIAR CONTRASEÑA (usuario autenticado)
+exports.changePassword = async (req, res) => {
+  try {
+    await authService.changePassword(req.user.userId, req.body);
+    return res.json({ msg: "Contraseña cambiada correctamente." });
+  } catch (e) {
+    return res.status(400).json({ msg: e.message });
+  }
+};
+
+// ✅ FORZAR CAMBIO DE CONTRASEÑA (si has usado reset-password)
+exports.forcePasswordChange = async (req, res) => {
+  try {
+    await authService.forcePasswordChange(req.user.userId, req.body);
+    return res.json({ msg: "Contraseña actualizada correctamente." });
+  } catch (e) {
+    return res.status(400).json({ msg: e.message });
+  }
+};
+
+// ✅ REGISTRAR ACTIVIDAD (opcional para auditoría)
+exports.registerActivity = async (req, res) => {
+  try {
+    await authService.registerActivity(req.user.userId, req.body.action);
+    return res.json({ msg: "Actividad registrada" });
+  } catch (e) {
+    return res.status(400).json({ msg: e.message });
+  }
 };

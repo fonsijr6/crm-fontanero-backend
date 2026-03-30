@@ -1,7 +1,7 @@
 exports.requireRole = (allowedRoles = []) => {
   return (req, res, next) => {
     if (!allowedRoles.includes(req.user.role)) {
-      return res.status(403).json({ message: "Forbidden: insufficient role" });
+      return res.status(403).json({ msg: "No tienes permisos para esta acción." });
     }
     next();
   };

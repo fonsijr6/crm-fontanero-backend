@@ -34,7 +34,7 @@ const userSchema = new mongoose.Schema(
     // 🛂 Rol dentro de la empresa
     role: {
       type: String,
-      enum: ["owner", "admin", "worker", "viewer"],
+      enum: ["superadmin","owner", "admin", "worker", "viewer"],
       default: "worker",
     },
 
