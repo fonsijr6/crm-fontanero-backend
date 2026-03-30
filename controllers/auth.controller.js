@@ -103,7 +103,7 @@ exports.logout = async (req, res) => {
 };
 
 // ✅ ME — Perfil del usuario autenticado
-exports.me = async (req, res) => {
+exports.getProfile  = async (req, res) => {
   try {
     return res.json({
       id: req.user.userId,

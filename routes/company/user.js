@@ -48,7 +48,7 @@ router.put(
   auth,
   requireCompany(User),
   requireRole(["owner"]),
-  controller.deactivateUser
+  controller.desactivateUser
 );
 
 // ✅ Eliminar empleado

@@ -31,7 +31,7 @@ app.use(express.json({ limit: "10mb" }));  // soporta imágenes pequeñas desde 
 app.use(cookieParser());
 
 // ✅ 4. Rutas de autenticación
-app.use("/api/auth", require("./routes/auth.routes"));
+app.use("/api/auth", require("./routes/company/auth"));
 
 // ✅ 5. RUTAS SUPERADMIN (solo para ti)
 app.use("/api/admin/companies", require("./routes/admin/company"));

@@ -49,3 +49,5 @@ router.delete(
   auditAction("Eliminar aviso", "task"),
   controller.deleteTask
 );
+
+module.exports = router;

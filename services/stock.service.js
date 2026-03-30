@@ -1,46 +1,61 @@
 // services/stock.service.js
-const StockItem = require('../models/Stock');
+const StockItem = require("../models/Stock");
 
-// ✅ CREATE STOCK ITEM
-exports.createItem = async (userId, data) => {
-  return StockItem.create({
-    userId,
-    name: data.name,
-    category: data.category,
-    quantity: data.quantity ?? 0,
-    unit: data.unit ?? "",
-    unitPrice: data.unitPrice ?? 0,
-    minStock: data.minStock ?? 0,
-  });
-};
+module.exports = {
+  async getAll(companyId) {
+    return await StockItem.find({ companyId }).sort({ createdAt: -1 });
+  },
 
-// ✅ GET ALL STOCK ITEMS
-exports.getItems = async (userId) => {
-  return StockItem.find({ userId }).sort({ createdAt: -1 });
-};
+  async getOne(companyId, itemId) {
+    return await StockItem.findOne({ _id: itemId, companyId });
+  },
 
-// ✅ GET STOCK ITEM BY ID
-exports.getItemById = async (userId, itemId) => {
-  return StockItem.findOne({ userId, _id: itemId });
-};
+  async create(companyId, userId, data) {
+    if (!data.name || data.name.trim().length === 0)
+      throw new Error("El nombre es obligatorio.");
+    if (data.name.length > 80)
+      throw new Error("El nombre no puede superar 80 caracteres.");
 
-// ✅ UPDATE STOCK ITEM
-exports.updateItem = async (userId, itemId, data) => {
-  return StockItem.findOneAndUpdate(
-    { userId, _id: itemId },
-    {
-      ...(data.name !== undefined && { name: data.name }),
-      ...(data.category !== undefined && { category: data.category }),
-      ...(data.quantity !== undefined && { quantity: data.quantity }),
-      ...(data.unit !== undefined && { unit: data.unit }),
-      ...(data.unitPrice !== undefined && { unitPrice: data.unitPrice }),
-      ...(data.minStock !== undefined && { minStock: data.minStock }),
-    },
-    { new: true }
-  );
-};
+    return await StockItem.create({
+      companyId,
+      name: data.name.trim(),
+      category: data.category || "",
+      quantity: data.quantity || 0,
+      unit: data.unit || "unidad",
+      unitPrice: data.unitPrice || 0,
+      minStock: data.minStock || 0,
+      updatedBy: userId,
+    });
+  },
 
-// ✅ DELETE STOCK ITEM
-exports.deleteItem = async (userId, itemId) => {
-  return StockItem.findOneAndDelete({ userId, _id: itemId });
+  async update(companyId, itemId, data) {
+    if (data.name && data.name.length > 80)
+      throw new Error("El nombre no puede superar 80 caracteres.");
+
+    return await StockItem.findOneAndUpdate(
+      { _id: itemId, companyId },
+      data,
+      { new: true }
+    );
+  },
+
+  async adjustStock(companyId, itemId, amount) {
+    const item = await StockItem.findOne({ _id: itemId, companyId });
+
+    if (!item) throw new Error("Elemento no encontrado.");
+
+    const newQty = item.quantity + Number(amount);
+
+    if (newQty < 0)
+      throw new Error("La cantidad no puede quedar negativa.");
+
+    item.quantity = newQty;
+    await item.save();
+
+    return item;
+  },
+
+  async remove(companyId, itemId) {
+    return await StockItem.deleteOne({ _id: itemId, companyId });
+  },
 };

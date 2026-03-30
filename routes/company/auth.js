@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
 
-const controller = require("../controllers/auth.controller");
-const { auth } = require("../middleware/auth.mw");
+const controller = require("../../controllers/auth.controller");
+const { auth } = require("../../middleware/auth.mw");
 
 // ✅ Login (empleados + owner)
 router.post("/login", controller.login);
@@ -23,4 +23,3 @@ router.get("/me", auth, controller.getProfile);
 router.post("/activity", auth, controller.registerActivity);
 
 module.exports = router;
-``

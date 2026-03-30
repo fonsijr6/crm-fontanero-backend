@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const StockItem = require("../../models/StockItem");
+const StockItem = require("../../models/Stock");
 const controller = require("../../controllers/stock.controller");
 
 const { auth } = require("../../middleware/auth.mw");
@@ -13,7 +13,7 @@ router.get(
   "/",
   auth,
   requireRole(["owner", "admin", "worker", "viewer"]),
-  controller.getStock
+  controller.getAll
 );
 
 // ✅ Crear un ítem de stock (owner, admin)
@@ -21,7 +21,7 @@ router.post(
   "/",
   auth,
   requireRole(["owner", "admin"]),
-  controller.createStockItem
+  controller.create
 );
 
 // ✅ Obtener stock por ID
@@ -30,7 +30,7 @@ router.get(
   auth,
   requireCompany(StockItem),
   requireRole(["owner", "admin", "worker", "viewer"]),
-  controller.getStockItem
+  controller.getOne
 );
 
 // ✅ Actualizar stock (owner, admin)
@@ -39,7 +39,7 @@ router.put(
   auth,
   requireCompany(StockItem),
   requireRole(["owner", "admin"]),
-  controller.updateStockItem
+  controller.update
 );
 
 // ✅ Ajustar cantidad (+ / -)
@@ -57,7 +57,7 @@ router.delete(
   auth,
   requireCompany(StockItem),
   requireRole(["owner"]),
-  controller.deleteStockItem
+  controller.remove
 );
 
 module.exports = router;

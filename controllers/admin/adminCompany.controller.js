@@ -1,4 +1,4 @@
-const adminService = require("../services/adminCompany.service");
+const adminService = require("../../services/adminCompany.service");
 
 exports.createCompanyWithOwner = async (req, res) => {
   try {

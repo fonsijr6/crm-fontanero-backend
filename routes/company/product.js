@@ -1,3 +1,6 @@
+const express = require("express");
+const router = express.Router();
+
 const Product = require("../../models/Product");
 const controller = require("../../controllers/product.controller");
 
@@ -42,3 +45,5 @@ router.delete(
   requireRole(["owner"]),
   controller.deleteProduct
 );
+
+module.exports = router;

@@ -1,154 +1,82 @@
 // controllers/stock.controller.js
-const stockService = require('../services/stock.service');
-const mongoose = require('mongoose');
+const stockService = require("../services/stock.service");
 
-/**
- * Create stock item
- * POST /stock
- */
-exports.create = async (req, res) => {
-  try {
-    if (!req.user?.id) return res.status(401).json({ message: 'Unauthorized' });
-
-    const { name, category, quantity, unit, unitPrice, minStock } = req.body || {};
-    const errors = [];
-
-    if (!name || typeof name !== 'string') errors.push('Name is required and must be a string');
-    if (!category || typeof category !== 'string') errors.push('Category is required and must be a string');
-    if (quantity !== undefined && (!Number.isInteger(quantity) || quantity < 0)) errors.push('Quantity must be a non-negative integer');
-    if (unit !== undefined && typeof unit !== 'string') errors.push('Unit must be a string if provided');
-    if (unitPrice !== undefined && typeof unitPrice !== 'number') errors.push('UnitPrice must be a number if provided');
-    if (minStock !== undefined && (!Number.isInteger(minStock) || minStock < 0)) errors.push('minStock must be a non-negative integer');
-
-    if (errors.length) return res.status(400).json({ message: 'Invalid data', errors });
-
-    const payload = {
-      name: name.trim(),
-      category: category.trim(),
-      ...(quantity !== undefined && { quantity }),
-      ...(unit !== undefined && { unit: unit.trim() }),
-      ...(unitPrice !== undefined && { unitPrice }),
-      ...(minStock !== undefined && { minStock }),
-    };
-
-    const item = await stockService.createItem(req.user.id, payload);
-    return res.status(201).json(item);
-
-  } catch (error) {
-    if (error?.status === 409 || error?.message === 'ITEM_EXISTS') {
-      return res.status(409).json({ message: 'Item already exists' });
-    }
-    if (error?.name === 'ValidationError') {
-      return res.status(400).json({ message: 'Validation failed', details: error.errors });
-    }
-    console.error('Error creating item:', error);
-    return res.status(500).json({ message: 'Error creating item' });
-  }
-};
-
-/**
- * Get all stock items
- * GET /stock
- */
+// ✅ Obtener todo el stock de la empresa
 exports.getAll = async (req, res) => {
   try {
-    if (!req.user?.id) return res.status(401).json({ message: 'Unauthorized' });
-
-    const items = await stockService.getItems(req.user.id);
-    return res.status(200).json(items);
-  } catch (error) {
-    console.error('Error fetching stock:', error);
-    return res.status(500).json({ message: 'Error fetching stock' });
+    const items = await stockService.getAll(req.user.companyId);
+    return res.json(items);
+  } catch (err) {
+    return res.status(400).json({ msg: err.message });
   }
 };
 
-/**
- * Get stock item by ID
- * GET /stock/:id
- */
+// ✅ Obtener un item concreto
 exports.getOne = async (req, res) => {
   try {
-    if (!req.user?.id) return res.status(401).json({ message: 'Unauthorized' });
-
-    const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ message: 'Invalid item ID' });
-
-    const item = await stockService.getItemById(req.user.id, id);
-    if (!item) return res.status(404).json({ message: 'Item not found' });
+    const item = await stockService.getOne(req.user.companyId, req.params.id);
+    if (!item) return res.status(404).json({ msg: "Elemento de stock no encontrado." });
 
     return res.json(item);
-  } catch (error) {
-    console.error('Error fetching item:', error);
-    return res.status(500).json({ message: 'Error fetching item' });
+  } catch (err) {
+    return res.status(400).json({ msg: err.message });
   }
 };
 
-/**
- * Update stock item
- * PUT /stock/:id
- */
+// ✅ Crear un item de stock
+exports.create = async (req, res) => {
+  try {
+    const item = await stockService.create(req.user.companyId, req.user.userId, req.body);
+    return res.status(201).json(item);
+  } catch (err) {
+    return res.status(400).json({ msg: err.message });
+  }
+};
+
+// ✅ Actualizar item de stock (categoría, nombre, límites, etc.)
 exports.update = async (req, res) => {
   try {
-    if (!req.user?.id) return res.status(401).json({ message: 'Unauthorized' });
-
-    const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ message: 'Invalid item ID' });
-
-    const { name, category, quantity, unit, unitPrice, minStock } = req.body || {};
-    const errors = [];
-
-    if (name !== undefined && typeof name !== 'string') errors.push('Name must be string');
-    if (category !== undefined && typeof category !== 'string') errors.push('Category must be string');
-    if (quantity !== undefined && (!Number.isInteger(quantity) || quantity < 0)) errors.push('Quantity must be a non-negative integer');
-    if (unit !== undefined && typeof unit !== 'string') errors.push('Unit must be string');
-    if (unitPrice !== undefined && typeof unitPrice !== 'number') errors.push('UnitPrice must be number');
-    if (minStock !== undefined && (!Number.isInteger(minStock) || minStock < 0)) errors.push('minStock must be a non-negative integer');
-
-    if (errors.length) return res.status(400).json({ message: 'Invalid data', errors });
-
-    const payload = {
-      ...(name !== undefined && { name: name.trim() }),
-      ...(category !== undefined && { category: category.trim() }),
-      ...(quantity !== undefined && { quantity }),
-      ...(unit !== undefined && { unit: unit.trim() }),
-      ...(unitPrice !== undefined && { unitPrice }),
-      ...(minStock !== undefined && { minStock }),
-    };
-
-    const item = await stockService.updateItem(req.user.id, id, payload);
-    if (!item) return res.status(404).json({ message: 'Item not found' });
-
+    const item = await stockService.update(
+      req.user.companyId,
+      req.params.id,
+      req.body
+    );
     return res.json(item);
-
-  } catch (error) {
-    if (error?.status === 409 || error?.message === 'ITEM_EXISTS') {
-      return res.status(409).json({ message: 'Item with these details already exists' });
-    }
-    if (error?.name === 'ValidationError') {
-      return res.status(400).json({ message: 'Validation failed', details: error.errors });
-    }
-    console.error('Error updating item:', error);
-    return res.status(500).json({ message: 'Error updating item' });
+  } catch (err) {
+    return res.status(400).json({ msg: err.message });
   }
 };
 
-/**
- * Delete stock item
- * DELETE /stock/:id
- */
+// ✅ Ajustar cantidad (+ / -)
+exports.adjustStock = async (req, res) => {
+  try {
+    const { amount } = req.body; // positivo o negativo
+
+    if (amount === undefined || isNaN(amount)) {
+      return res.status(400).json({ msg: "Debes enviar una cantidad válida." });
+    }
+
+    const updated = await stockService.adjustStock(
+      req.user.companyId,
+      req.params.id,
+      amount
+    );
+
+    return res.json({
+      msg: "Stock actualizado correctamente.",
+      item: updated,
+    });
+  } catch (err) {
+    return res.status(400).json({ msg: err.message });
+  }
+};
+
+// ✅ Eliminar item de stock
 exports.remove = async (req, res) => {
   try {
-    if (!req.user?.id) return res.status(401).json({ message: 'Unauthorized' });
-
-    const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ message: 'Invalid item ID' });
-
-    const item = await stockService.deleteItem(req.user.id, id);
-    if (!item) return res.status(404).json({ message: 'Item not found' });
-
-    return res.sendStatus(204);
-  } catch (error) {
-    console.error('Error deleting item:', error);
-    return res.status(500).json({ message: 'Error deleting item' });
+    await stockService.remove(req.user.companyId, req.params.id);
+    return res.json({ msg: "Item de stock eliminado correctamente." });
+  } catch (err) {
+    return res.status(400).json({ msg: err.message });
   }
 };
