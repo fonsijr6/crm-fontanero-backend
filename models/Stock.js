@@ -1,39 +1,55 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const stockSchema = new mongoose.Schema({
-  userId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    required: true, 
-    index: true 
+const stockItemSchema = new mongoose.Schema(
+  {
+    // ✅ Multi-empresa
+    companyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Company",
+      required: true,
+      index: true,
+    },
+
+    // ✅ Producto al que pertenece este stock
+    productId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
+      required: true,
+    },
+
+    // ✅ Cantidad actual del stock
+    quantity: {
+      type: Number,
+      default: 0,
+    },
+
+    // ✅ Mínimo aceptable (alerta)
+    minStock: {
+      type: Number,
+      default: 0,
+    },
+
+    // ✅ Auditoría básica
+    updatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
+    // ✅ Opcional: motivo o descripción del último movimiento
+    lastMovementNote: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    // ✅ Opcional: Fecha del último movimiento
+    lastMovementAt: {
+      type: Date,
+      default: null,
+    },
   },
+  { timestamps: true }
+);
 
-  name: { type: String, required: true },
-  category: { type: String, required: true },
-  quantity: { type: Number, default: 0 },
-  unit: { type: String },
-  unitPrice: { type: Number },
-  minStock: { type: Number }
-
-}, {
-  timestamps: true,
-  versionKey: false,
-  toJSON: {
-    virtuals: true,
-    transform: (_doc, ret) => {
-      ret.id = ret._id.toString();
-      delete ret._id;
-      return ret;
-    }
-  },
-  toObject: {
-    virtuals: true,
-    transform: (_doc, ret) => {
-      ret.id = ret._id.toString();
-      delete ret._id;
-      return ret;
-    }
-  }
-});
-
-const StockItem = mongoose.model('StockItem', stockSchema);
-module.exports = StockItem;
+module.exports = mongoose.model("StockItem", stockItemSchema);

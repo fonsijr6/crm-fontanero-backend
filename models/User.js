@@ -2,6 +2,15 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
+    // 🔐 A qué empresa pertenece este usuario
+    companyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Company",
+      required: true,
+      index: true,
+    },
+
+    // 👤 Identidad básica
     name: {
       type: String,
       required: true,
@@ -19,32 +28,48 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      select: false,
+      select: false,  // ✅ seguridad: no se devuelve por defecto
     },
 
-    // ✅ Dirección fiscal del autónomo
-    issuerAddress: {
+    // 🛂 Rol dentro de la empresa
+    role: {
       type: String,
-      default: "",
-      trim: true,
+      enum: ["owner", "admin", "worker", "viewer"],
+      default: "worker",
     },
 
-    // ✅ NIF / CIF del autónomo
-    issuerNif: {
+    // ✅ Datos opcionales de perfil (útiles para notificaciones, tareas, etc.)
+    phone: {
       type: String,
-      default: "",
       trim: true,
+      default: "",
     },
 
-    // ✅ Email del autónomo (para Reply-To en facturas)
-    issuerEmail: {
+    avatarUrl: {
       type: String,
-      default: "",
       trim: true,
+      default: "",
+    },
+
+    // ✅ Estado del usuario (para suspender empleados sin borrarlos)
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+
+    // ✅ Última vez que inició sesión (útil en SaaS)
+    lastLoginAt: {
+      type: Date,
+      default: null,
+    },
+
+    // ✅ Opcional: notificaciones o preferencias del usuario
+    preferences: {
+      theme: { type: String, default: "system" },
+      language: { type: String, default: "es" },
     },
   },
   { timestamps: true }
 );
 
-const User = mongoose.model("User", userSchema);
-module.exports = User;
+module.exports = mongoose.model("User", userSchema);

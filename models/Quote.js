@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 
-const invoiceSchema = new mongoose.Schema(
+const quoteSchema = new mongoose.Schema(
   {
-    // ✅ Multi-empresa: cada factura pertenece a una empresa
+    // ✅ Multi-empresa
     companyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Company",
@@ -10,46 +10,46 @@ const invoiceSchema = new mongoose.Schema(
       index: true,
     },
 
-    // ✅ Cliente al que se factura
+    // ✅ Cliente al que va dirigido
     clientId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Client",
       required: true,
     },
 
-    // ✅ Usuario que creó la factura
+    // ✅ Quién creó el presupuesto
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
 
-    // ✅ Número de factura (p. ej. FAC-2026-001)
-    invoiceNumber: {
+    // ✅ Número del presupuesto (PRES-001, etc.)
+    quoteNumber: {
       type: String,
       required: true,
       trim: true,
     },
 
-    // ✅ Fecha de emisión
+    // ✅ Fecha de creación
     date: {
       type: Date,
       required: true,
       default: Date.now,
     },
 
-    // ✅ Fecha de vencimiento
-    dueDate: {
+    // ✅ Validez (por ejemplo 30 días)
+    validUntil: {
       type: Date,
       default: null,
     },
 
-    // ✅ Líneas de la factura (productos/servicios)
+    // ✅ Líneas del presupuesto
     items: [
       {
         productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
         name: { type: String, required: true },      // copia del nombre del producto
-        description: { type: String, default: "" },
+        description: { type: String, default: "" },  // copia opcional
         quantity: { type: Number, default: 1 },
         unitPrice: { type: Number, required: true },
         taxRate: { type: Number, default: 21 },
@@ -73,21 +73,21 @@ const invoiceSchema = new mongoose.Schema(
       required: true,
     },
 
-    // ✅ Estado de la factura
+    // ✅ Estado del presupuesto
     status: {
       type: String,
-      enum: ["draft", "sent", "paid", "cancelled"],
-      default: "draft",
+      enum: ["pending", "accepted", "rejected"],
+      default: "pending",
     },
 
-    // ✅ Relación con Presupuesto, si viene de uno
-    quoteId: {
+    // ✅ Si se convierte en factura
+    invoiceId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Quote",
+      ref: "Invoice",
       default: null,
     },
 
-    // ✅ PDF generado (Cloudinary, S3, etc.)
+    // ✅ URL de PDF (si decides generarlo)
     pdfUrl: {
       type: String,
       default: "",
@@ -98,28 +98,8 @@ const invoiceSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-
-    // ✅ Método de pago para análisis
-    paymentMethod: {
-      type: String,
-      enum: ["cash", "card", "transfer", "online", "other"],
-      default: "transfer",
-    },
-
-    // ✅ Fecha de pago si está pagada
-    paidAt: {
-      type: Date,
-      default: null,
-    },
-
-    // ✅ Auditoría
-    updatedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      default: null,
-    },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Invoice", invoiceSchema);
+module.exports = mongoose.model("Quote", quoteSchema);
