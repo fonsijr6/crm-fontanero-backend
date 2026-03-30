@@ -68,6 +68,28 @@ const userSchema = new mongoose.Schema(
       theme: { type: String, default: "system" },
       language: { type: String, default: "es" },
     },
+    permissions: {
+      clients: {
+        view: { type: Boolean, default: true },
+        create: { type: Boolean, default: false },
+        edit: { type: Boolean, default: false },
+        delete: { type: Boolean, default: false },
+      },
+      tasks: {
+        view: { type: Boolean, default: true },
+        create: { type: Boolean, default: false },
+        edit: { type: Boolean, default: false },
+        assign: { type: Boolean, default: false },
+        complete: { type: Boolean, default: false },
+        delete: { type: Boolean, default: false },
+      },
+      invoices: {
+        view: { type: Boolean, default: false },
+        create: { type: Boolean, default: false },
+        edit: { type: Boolean, default: false },
+        delete: { type: Boolean, default: false },
+      }
+    }
   },
   { timestamps: true }
 );

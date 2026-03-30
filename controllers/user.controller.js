@@ -57,6 +57,19 @@ exports.desactivateUser = async (req, res) => {
   }
 };
 
+exports.updatePermissions = async (req, res) => {
+  try {
+    const user = await User.findOneAndUpdate(
+      { _id: req.params.id, companyId: req.user.companyId },
+      { permissions: req.body.permissions },
+      { new: true }
+    );
+    res.json(user);
+  } catch (e) {
+    res.status(400).json({ msg: e.message });
+  }
+};
+
 exports.deleteUser = async (req, res) => {
   try {
     await userService.deleteUser(req.user.companyId, req.params.id);

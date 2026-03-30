@@ -1,6 +1,29 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 
+const DEFAULT_PERMISSIONS = {
+  owner: { 
+    clients: { view: true, create: true, edit: true, delete: true },
+    tasks: { view: true, create: true, edit: true, assign: true, complete: true, delete: true },
+    invoices: { view: true, create: true, edit: true, delete: true },
+  },
+  admin: {
+    clients: { view: true, create: true, edit: true, delete: false },
+    tasks: { view: true, create: true, edit: true, assign: true, complete: true, delete: false },
+    invoices: { view: true, create: true, edit: true, delete: false },
+  },
+  worker: {
+    clients: { view: true, create: false, edit: false, delete: false },
+    tasks: { view: true, create: true, edit: true, assign: false, complete: true, delete: false },
+    invoices: { view: false, create: false, edit: false, delete: false },
+  },
+  viewer: {
+    clients: { view: true, create: false, edit: false, delete: false },
+    tasks: { view: true, create: false, edit: false, assign: false, complete: false, delete: false },
+    invoices: { view: false, create: false, edit: false, delete: false },
+  }
+};
+
 module.exports = {
   // ✅ Crear usuario (empleado u owner)
   async createUser({ companyId, name, email, password, role }) {
@@ -24,6 +47,7 @@ module.exports = {
       email: email.trim().toLowerCase(),
       password: hashed,
       role: role || "worker",
+      permissions: DEFAULT_PERMISSIONS[role],
     });
   },
 
