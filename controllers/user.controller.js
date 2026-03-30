@@ -48,9 +48,9 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-exports.desactivateUser = async (req, res) => {
+exports.deactivateUser = async (req, res) => {
   try {
-    const user = await userService.desactivateUser(req.user.companyId, req.params.id);
+    const user = await userService.deactivateUser(req.user.companyId, req.params.id);
     return res.json(user);
   } catch (err) {
     return res.status(400).json({ msg: err.message });

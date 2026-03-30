@@ -70,7 +70,7 @@ module.exports = {
     }).select("-password");
   },
 
-  async desactivateUser(companyId, userId) {
+  async deactivateUser(companyId, userId) {
     return await User.findOneAndUpdate(
       { _id: userId, companyId },
       { isActive: false },

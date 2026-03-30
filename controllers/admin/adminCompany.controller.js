@@ -37,7 +37,7 @@ exports.updateCompany = async (req, res) => {
   }
 };
 
-exports.desactivateCompany = async (req, res) => {
+exports.deactivateCompany = async (req, res) => {
   try {
     const updated = await adminService.deactivateCompany(req.params.id);
     return res.json(updated);
