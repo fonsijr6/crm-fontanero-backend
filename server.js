@@ -18,6 +18,8 @@ app.use(cookieParser());
 
 // ✅ Auth
 app.use("/api/auth", require("./routes/auth.routes"));
+// Solo desarrollo
+app.use("/api/setup", require("./routes/setup.routes"));
 
 // ✅ Rutas multiempresa
 app.use("/api/company/users", require("./routes/company/users.routes"));
