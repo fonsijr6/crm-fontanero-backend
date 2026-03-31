@@ -10,42 +10,23 @@ module.exports.auth = async (req, res, next) => {
     }
 
     const token = authHeader.split(" ")[1];
-    const secret = process.env.JWT_ACCESS_SECRET;
+    const payload = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
 
-    if (!secret) {
-      console.error("[JWT] Missing JWT_ACCESS_SECRET");
-      return res.status(500).json({ msg: "JWT configuration error" });
-    }
+    const userId = payload.userId;
+    if (!userId) return res.status(401).json({ msg: "Invalid token" });
 
-    // ✅ Decodifica token
-    const payload = jwt.verify(token, secret);
-
-    const userId = payload.userId || payload.id || payload.sub;
-
-    if (!userId) {
-      return res.status(401).json({ msg: "Token inválido: falta userId." });
-    }
-
-    // ✅ Carga usuario real (sin password)
     const user = await User.findById(userId).select("-password");
+    if (!user) return res.status(401).json({ msg: "User not found" });
+    if (!user.isActive) return res.status(401).json({ msg: "User disabled" });
 
-    if (!user || !user.isActive) {
-      return res.status(401).json({ msg: "Invalid user" });
-    }
-
-    // ✅ Carga datos multi-empresa
     req.user = {
       userId: user._id,
       companyId: user.companyId,
       role: user.role,
-      name: user.name,
-      email: user.email,
-      lastLoginAt: user.lastLoginAt,
+      permissions: user.permissions || {}
     };
 
-    req.auth = payload;
-
-    return next();
+    next();
   } catch (err) {
     return res.status(401).json({ msg: "Invalid or expired token" });
   }

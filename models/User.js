@@ -2,19 +2,16 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
-    // 🔐 A qué empresa pertenece este usuario
-    
     companyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Company",
-      default: null,       // ✅ superadmin NO necesita empresa
+      required: true
     },
 
-    // 👤 Identidad básica
     name: {
       type: String,
       required: true,
-      trim: true,
+      trim: true
     },
 
     email: {
@@ -23,75 +20,38 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
+      maxlength: 254
     },
 
     password: {
       type: String,
       required: true,
-      select: false,  // ✅ seguridad: no se devuelve por defecto
+      select: false
     },
 
-    // 🛂 Rol dentro de la empresa
     role: {
       type: String,
       enum: ["owner", "admin", "worker", "viewer"],
-      default: "worker",
+      default: "worker"
     },
 
-    // ✅ Datos opcionales de perfil (útiles para notificaciones, tareas, etc.)
-    phone: {
-      type: String,
-      trim: true,
-      default: "",
-    },
-
-    avatarUrl: {
-      type: String,
-      trim: true,
-      default: "",
-    },
-
-    // ✅ Estado del usuario (para suspender empleados sin borrarlos)
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-
-    // ✅ Última vez que inició sesión (útil en SaaS)
-    lastLoginAt: {
-      type: Date,
-      default: null,
-    },
-
-    // ✅ Opcional: notificaciones o preferencias del usuario
-    preferences: {
-      theme: { type: String, default: "system" },
-      language: { type: String, default: "es" },
-    },
     permissions: {
-      clients: {
-        view: { type: Boolean, default: true },
-        create: { type: Boolean, default: false },
-        edit: { type: Boolean, default: false },
-        delete: { type: Boolean, default: false },
-      },
-      tasks: {
-        view: { type: Boolean, default: true },
-        create: { type: Boolean, default: false },
-        edit: { type: Boolean, default: false },
-        assign: { type: Boolean, default: false },
-        complete: { type: Boolean, default: false },
-        delete: { type: Boolean, default: false },
-      },
-      invoices: {
-        view: { type: Boolean, default: false },
-        create: { type: Boolean, default: false },
-        edit: { type: Boolean, default: false },
-        delete: { type: Boolean, default: false },
-      }
-    }
+      type: Object,
+      default: {}
+    },
+
+    isActive: { type: Boolean, default: true },
+
+    loginAttempts: { type: Number, default: 0 },
+    isLocked: { type: Boolean, default: false },
+    lockedUntil: { type: Date, default: null },
+
+    lastLoginAt: { type: Date, default: null },
+    lastActivityAt: { type: Date, default: null },
+
+    mustChangePassword: { type: Boolean, default: false }
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.models.User || mongoose.model("User", userSchema);
