@@ -4,7 +4,6 @@ const isProd = process.env.NODE_ENV === "production";
 
 // ✅ LOGIN
 exports.login = async (req, res) => {
-  console.log("LOGIN BODY:", req.body);
   try {
     const { token, refreshToken, user } = await authService.login(req.body);
 
