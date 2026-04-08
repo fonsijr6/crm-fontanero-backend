@@ -4,7 +4,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
 const app = express();
-
+connectDB();
 /* ============================
    🔴 CORS – DEBE IR PRIMERO
    ============================ */
