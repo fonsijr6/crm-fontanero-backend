@@ -1,45 +1,41 @@
 require("dotenv").config();
 const express = require("express");
-const cookieParser = require("cookie-parser");
 const cors = require("cors");
-const connectDB = require("./config/db");
+const cookieParser = require("cookie-parser");
 
 const app = express();
 
-connectDB();
+/* ============================
+   🔴 CORS – DEBE IR PRIMERO
+   ============================ */
 
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://plumbflow-8pjpp1eym-fonsijr6s-projects.vercel.app",
+    "https://plumiks.com",
+    "https://www.plumiks.com"
+  ],
+  credentials: true
+}));
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://plumbflow-8pjpp1eym-fonsijr6s-projects.vercel.app",
-  "https://plumiks.com",
-  "https://www.plumiks.com"
-];
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+  next();
+});
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Requests sin origin (Postman, curl)
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      // 🔴 IMPORTANTE: NO lanzar error
-      return callback(null, false);
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"]
-  })
-);
-
+/* ============================
+   Middleware estándar
+   ============================ */
 
 app.use(express.json());
 app.use(cookieParser());
 
-// ✅ Auth
+/* ============================
+   RUTAS
+   ============================ */
 app.use("/api/auth", require("./routes/auth.routes"));
 // Solo desarrollo
 app.use("/api/setup", require("./routes/setup.routes"));
@@ -53,4 +49,8 @@ app.use("/api/company/quotes", require("./routes/company/quotes.routes"));
 app.use("/api/company/invoices", require("./routes/company/invoices.routes"));
 app.use("/api/company/stock", require("./routes/company/stock.routes"));
 
-app.listen(4000, () => console.log("✅ Backend iniciado en 4000"));
+/* ============================ */
+
+app.listen(4000, () => {
+  console.log("✅ Backend corriendo");
+});
