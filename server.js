@@ -8,31 +8,31 @@ const app = express();
 
 connectDB();
 
-
 const allowedOrigins = [
   "http://localhost:5173",
   "https://plumbflow-k2unole6b-fonsijr6s-projects.vercel.app",
-  "https://www.plumiks.com/",
-  "https://plumiks.com/"
+  "https://plumiks.com",
+  "https://www.plumiks.com"
 ];
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // Permitir llamadas sin origin (Postman, mobile apps)
+    origin: (origin, callback) => {
+      // Permitir llamadas sin origin (Postman, mobile apps, cron, health checks)
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       } else {
-        return callback(new Error("CORS not allowed"));
+        console.error("❌ CORS blocked for origin:", origin);
+        return callback(new Error("Not allowed by CORS"));
       }
     },
-    credentials: true,          
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization"]
   })
-);
+)
 
 
 app.use(express.json());

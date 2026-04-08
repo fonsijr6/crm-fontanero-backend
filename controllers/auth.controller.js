@@ -1,5 +1,7 @@
 const authService = require("../services/auth.service");
 
+const isProd = process.env.NODE_ENV === "production";
+
 // ✅ LOGIN
 exports.login = async (req, res) => {
   try {
@@ -7,9 +9,9 @@ exports.login = async (req, res) => {
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: false,        // ✅ En producción: true
-      sameSite: "lax",
-      path: "/",            // ✅ importante para que funcione refresh
+      secure: isProd,                 // ✅ true en producción
+      sameSite: isProd ? "none" : "lax", // ✅ REQUIRED para dominios cruzados
+      path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
@@ -27,17 +29,16 @@ exports.refresh = async (req, res) => {
     const { accessToken, refreshToken } =
       await authService.refreshTokens(oldToken);
 
-    // ✅ Renovar cookie
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
       path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
     return res.json({ token: accessToken });
-  } catch (e) {
+  } catch {
     return res.status(401).json({ msg: "No autorizado" });
   }
 };
@@ -52,8 +53,8 @@ exports.logout = async (req, res) => {
   try {
     res.clearCookie("refreshToken", {
       httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
       path: "/"
     });
 
