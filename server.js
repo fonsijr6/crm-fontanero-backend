@@ -19,13 +19,6 @@ app.use(cors({
   credentials: true
 }));
 
-app.use((req, res, next) => {
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
-  }
-  next();
-});
-
 /* ============================
    Middleware estándar
    ============================ */
