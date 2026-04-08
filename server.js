@@ -11,7 +11,7 @@ connectDB();
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://plumbflow-k2unole6b-fonsijr6s-projects.vercel.app",
+  "https://plumbflow-8pjpp1eym-fonsijr6s-projects.vercel.app",
   "https://plumiks.com",
   "https://www.plumiks.com"
 ];
