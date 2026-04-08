@@ -44,6 +44,8 @@ app.use("/api/company/stock", require("./routes/company/stock.routes"));
 
 /* ============================ */
 
-app.listen(4000, () => {
-  console.log("✅ Backend corriendo");
+
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+  console.log("✅ Backend corriendo en puerto", PORT);
 });
