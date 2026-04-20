@@ -79,15 +79,27 @@ module.exports = {
     return product;
   },
 
-  // ❌ BORRADO FÍSICO FUERA
-  async deactivateProduct(companyId, productId, userId) {
+  
+  async deleteProduct(companyId, productId) {
     const product = await Product.findOne({ _id: productId, companyId });
-    if (!product) throw new Error("Producto no encontrado.");
+    if (!product) {
+      throw new Error("Producto no encontrado");
+    }
 
-    product.isActive = false;
-    product.updatedBy = userId;
-    await product.save();
+    // ✅ Si es material, borrar su stock asociado
+    if (product.type === "material") {
+      await Stock.deleteOne({
+        companyId,
+        productId: product._id
+      });
+    }
 
-    return product;
-  },
+    // ✅ Borrar producto
+    await Product.deleteOne({
+      _id: product._id,
+      companyId
+    });
+
+    return true;
+  }
 };

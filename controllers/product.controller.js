@@ -58,20 +58,17 @@ exports.updateProduct = async (req, res) => {
   }
 };
 
-// ✅ Desactivar producto (NO borrar)
-exports.deactivateProduct = async (req, res) => {
+// ✅ Eliminar producto
+exports.deleteProduct = async (req, res) => {
   try {
-    const product = await productService.deactivateProduct(
+    await productService.deleteProduct(
       req.user.companyId,
-      req.params.id,
-      req.user.userId
+      req.params.id
     );
 
-    res.json({
-      msg: "Producto desactivado correctamente",
-      product,
-    });
+    res.json({ msg: "Producto eliminado correctamente" });
   } catch (err) {
     res.status(400).json({ msg: err.message });
   }
 };
+const productService = require("../services/product.service");
