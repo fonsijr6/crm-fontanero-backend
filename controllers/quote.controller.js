@@ -1,5 +1,6 @@
 const quoteService = require("../services/quote.service");
 
+// ✅ Crear presupuesto (draft)
 exports.createQuote = async (req, res) => {
   try {
     const quote = await quoteService.createQuote(
@@ -13,6 +14,7 @@ exports.createQuote = async (req, res) => {
   }
 };
 
+// ✅ Listar presupuestos
 exports.getQuotes = async (req, res) => {
   try {
     const quotes = await quoteService.getQuotes(req.user.companyId);
@@ -22,6 +24,7 @@ exports.getQuotes = async (req, res) => {
   }
 };
 
+// ✅ Obtener presupuesto por ID
 exports.getQuote = async (req, res) => {
   try {
     const quote = await quoteService.getQuote(
@@ -39,6 +42,7 @@ exports.getQuote = async (req, res) => {
   }
 };
 
+// ✅ Editar presupuesto (solo si NO está convertido)
 exports.updateQuote = async (req, res) => {
   try {
     const quote = await quoteService.updateQuote(
@@ -52,19 +56,28 @@ exports.updateQuote = async (req, res) => {
   }
 };
 
+// ✅ Cambiar estado → accepted / rejected
 exports.updateQuoteStatus = async (req, res) => {
   try {
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({ msg: "Estado requerido" });
+    }
+
     const quote = await quoteService.updateQuoteStatus(
       req.user.companyId,
       req.params.id,
-      req.body.status
+      status
     );
+
     res.json(quote);
   } catch (err) {
     res.status(400).json({ msg: err.message });
   }
 };
 
+// ✅ Convertir presupuesto aceptado → factura
 exports.convertQuoteToInvoice = async (req, res) => {
   try {
     const invoice = await quoteService.convertToInvoice(

@@ -1,5 +1,6 @@
 const invoiceService = require("../services/invoice.service");
 
+// ✅ Crear factura (draft)
 exports.createInvoice = async (req, res) => {
   try {
     const invoice = await invoiceService.createInvoice(
@@ -7,13 +8,13 @@ exports.createInvoice = async (req, res) => {
       req.user.userId,
       req.body
     );
-
     res.status(201).json(invoice);
   } catch (err) {
     res.status(400).json({ msg: err.message });
   }
 };
 
+// ✅ Listar facturas
 exports.getInvoices = async (req, res) => {
   try {
     const invoices = await invoiceService.getInvoices(req.user.companyId);
@@ -23,6 +24,7 @@ exports.getInvoices = async (req, res) => {
   }
 };
 
+// ✅ Obtener factura por ID
 exports.getInvoice = async (req, res) => {
   try {
     const invoice = await invoiceService.getInvoice(
@@ -40,6 +42,7 @@ exports.getInvoice = async (req, res) => {
   }
 };
 
+// ✅ Actualizar factura (solo draft)
 exports.updateInvoice = async (req, res) => {
   try {
     const invoice = await invoiceService.updateInvoice(
@@ -53,17 +56,26 @@ exports.updateInvoice = async (req, res) => {
   }
 };
 
-// ✅ Emitir / cancelar factura
+// ✅ Cambiar estado de factura
+// draft → sent   (consume stock)
+// sent → paid    (marca pago)
+// sent → cancelled / draft → cancelled
 exports.updateInvoiceStatus = async (req, res) => {
   try {
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({ msg: "Estado requerido" });
+    }
+
     const invoice = await invoiceService.updateInvoiceStatus(
       req.user.companyId,
       req.params.id,
-      req.body.status
+      status
     );
+
     res.json(invoice);
   } catch (err) {
     res.status(400).json({ msg: err.message });
   }
 };
-``

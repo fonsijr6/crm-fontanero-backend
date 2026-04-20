@@ -9,12 +9,12 @@ const { requireRole } = require("../../middleware/requireRole");
 const { requireCompany } = require("../../middleware/requireCompany");
 const { requirePermission } = require("../../middleware/requirePermission");
 
-// ✅ Crear presupuesto
+// ✅ Crear presupuesto (draft)
 router.post(
   "/",
   auth,
   requireRole(["owner", "admin"]),
-  requirePermission("quote", "create"),
+  requirePermission("quotes", "create"),
   controller.createQuote
 );
 
@@ -23,7 +23,7 @@ router.get(
   "/",
   auth,
   requireRole(["owner", "admin", "worker", "viewer"]),
-  requirePermission("quote", "view"),
+  requirePermission("quotes", "view"),
   controller.getQuotes
 );
 
@@ -33,17 +33,17 @@ router.get(
   auth,
   requireCompany(Quote),
   requireRole(["owner", "admin", "worker", "viewer"]),
-  requirePermission("quote", "view"),
+  requirePermission("quotes", "view"),
   controller.getQuote
 );
 
-// ✅ Editar presupuesto (solo draft)
+// ✅ Editar presupuesto (solo si draft)
 router.put(
   "/:id",
   auth,
   requireCompany(Quote),
   requireRole(["owner", "admin"]),
-  requirePermission("quote", "edit"),
+  requirePermission("quotes", "edit"),
   controller.updateQuote
 );
 
@@ -53,7 +53,7 @@ router.put(
   auth,
   requireCompany(Quote),
   requireRole(["owner", "admin"]),
-  requirePermission("quote", "edit"),
+  requirePermission("quotes", "edit"),
   controller.updateQuoteStatus
 );
 
@@ -63,9 +63,8 @@ router.post(
   auth,
   requireCompany(Quote),
   requireRole(["owner", "admin"]),
-  requirePermission("quote", "convert"),
+  requirePermission("quotes", "convert"),
   controller.convertQuoteToInvoice
 );
 
 module.exports = router;
-``
