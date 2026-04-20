@@ -71,4 +71,3 @@ exports.deleteProduct = async (req, res) => {
     res.status(400).json({ msg: err.message });
   }
 };
-const productService = require("../services/product.service");
