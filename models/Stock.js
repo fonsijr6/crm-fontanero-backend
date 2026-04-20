@@ -1,8 +1,7 @@
 const mongoose = require("mongoose");
 
-const stockItemSchema = new mongoose.Schema(
+const stockSchema = new mongoose.Schema(
   {
-    // ✅ Multi-empresa
     companyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Company",
@@ -10,40 +9,36 @@ const stockItemSchema = new mongoose.Schema(
       index: true,
     },
 
-    // ✅ Producto al que pertenece este stock
     productId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Product",
       required: true,
+      unique: true, // ✅ un producto solo tiene un stock
     },
 
-    // ✅ Cantidad actual del stock
     quantity: {
       type: Number,
       default: 0,
+      min: 0,
     },
 
-    // ✅ Mínimo aceptable (alerta)
     minStock: {
       type: Number,
       default: 0,
     },
 
-    // ✅ Auditoría básica
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       default: null,
     },
 
-    // ✅ Opcional: motivo o descripción del último movimiento
     lastMovementNote: {
       type: String,
       trim: true,
       default: "",
     },
 
-    // ✅ Opcional: Fecha del último movimiento
     lastMovementAt: {
       type: Date,
       default: null,
@@ -52,4 +47,4 @@ const stockItemSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("StockItem", stockItemSchema);
+module.exports = mongoose.model("Stock", stockSchema);

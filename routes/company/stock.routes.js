@@ -1,63 +1,40 @@
 const express = require("express");
 const router = express.Router();
 
-const StockItem = require("../../models/Stock");
+const Stock = require("../../models/Stock");
 const controller = require("../../controllers/stock.controller");
 
 const { auth } = require("../../middleware/auth.mw");
 const { requireRole } = require("../../middleware/requireRole");
 const { requireCompany } = require("../../middleware/requireCompany");
+const { requirePermission } = require("../../middleware/requirePermission");
 
-// ✅ Ver stock (todos los roles)
+// ✅ Ver inventario (solo materiales)
 router.get(
   "/",
   auth,
   requireRole(["owner", "admin", "worker", "viewer"]),
-  controller.getAll
+  requirePermission("stock", "view"),
+  controller.getInventory
 );
 
-// ✅ Crear un ítem de stock (owner, admin)
-router.post(
-  "/",
-  auth,
-  requireRole(["owner", "admin"]),
-  controller.create
-);
-
-// ✅ Obtener stock por ID
+// ✅ Ver stock por producto
 router.get(
-  "/:id",
+  "/product/:productId",
   auth,
-  requireCompany(StockItem),
   requireRole(["owner", "admin", "worker", "viewer"]),
-  controller.getOne
+  requirePermission("stock", "view"),
+  controller.getByProduct
 );
 
-// ✅ Actualizar stock (owner, admin)
-router.put(
-  "/:id",
-  auth,
-  requireCompany(StockItem),
-  requireRole(["owner", "admin"]),
-  controller.update
-);
-
-// ✅ Ajustar cantidad (+ / -)
+// ✅ Ajuste manual de stock
 router.put(
   "/:id/adjust",
   auth,
-  requireCompany(StockItem),
+  requireCompany(Stock),
   requireRole(["owner", "admin"]),
-  controller.adjustStock
-);
-
-// ✅ Eliminar stock
-router.delete(
-  "/:id",
-  auth,
-  requireCompany(StockItem),
-  requireRole(["owner"]),
-  controller.remove
+  requirePermission("stock", "edit"),
+  controller.adjust
 );
 
 module.exports = router;

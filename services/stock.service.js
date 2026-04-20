@@ -1,61 +1,56 @@
-// services/stock.service.js
-const StockItem = require("../models/Stock");
+const Stock = require("../models/Stock");
+const Product = require("../models/Product");
 
 module.exports = {
-  async getAll(companyId) {
-    return await StockItem.find({ companyId }).sort({ createdAt: -1 });
+  async getInventory(companyId) {
+    return await Stock.find({ companyId })
+      .populate("productId")
+      .sort({ updatedAt: -1 });
   },
 
-  async getOne(companyId, itemId) {
-    return await StockItem.findOne({ _id: itemId, companyId });
+  async getByProduct(companyId, productId) {
+    return await Stock.findOne({ companyId, productId })
+      .populate("productId");
   },
 
-  async create(companyId, userId, data) {
-    if (!data.name || data.name.trim().length === 0)
-      throw new Error("El nombre es obligatorio.");
-    if (data.name.length > 80)
-      throw new Error("El nombre no puede superar 80 caracteres.");
+  async createForProduct(companyId, productId, quantity = 0) {
+    const product = await Product.findOne({ _id: productId, companyId });
 
-    return await StockItem.create({
+    if (!product) {
+      throw new Error("Producto no encontrado.");
+    }
+
+    if (product.type !== "material") {
+      throw new Error("Solo los productos materiales pueden tener stock.");
+    }
+
+    const existing = await Stock.findOne({ companyId, productId });
+    if (existing) return existing;
+
+    return await Stock.create({
       companyId,
-      name: data.name.trim(),
-      category: data.category || "",
-      quantity: data.quantity || 0,
-      unit: data.unit || "unidad",
-      unitPrice: data.unitPrice || 0,
-      minStock: data.minStock || 0,
-      updatedBy: userId,
+      productId,
+      quantity,
+      minStock: 0,
+      lastMovementNote: "Stock inicial",
+      lastMovementAt: new Date(),
     });
   },
 
-  async update(companyId, itemId, data) {
-    if (data.name && data.name.length > 80)
-      throw new Error("El nombre no puede superar 80 caracteres.");
+  async adjust(companyId, stockId, amount) {
+    const stock = await Stock.findOne({ _id: stockId, companyId });
+    if (!stock) throw new Error("Stock no encontrado.");
 
-    return await StockItem.findOneAndUpdate(
-      { _id: itemId, companyId },
-      data,
-      { new: true }
-    );
-  },
+    const newQty = stock.quantity + Number(amount);
 
-  async adjustStock(companyId, itemId, amount) {
-    const item = await StockItem.findOne({ _id: itemId, companyId });
+    if (newQty < 0) {
+      throw new Error("Stock negativo no permitido.");
+    }
 
-    if (!item) throw new Error("Elemento no encontrado.");
+    stock.quantity = newQty;
+    stock.lastMovementAt = new Date();
+    await stock.save();
 
-    const newQty = item.quantity + Number(amount);
-
-    if (newQty < 0)
-      throw new Error("La cantidad no puede quedar negativa.");
-
-    item.quantity = newQty;
-    await item.save();
-
-    return item;
-  },
-
-  async remove(companyId, itemId) {
-    return await StockItem.deleteOne({ _id: itemId, companyId });
+    return stock;
   },
 };

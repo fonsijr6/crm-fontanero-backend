@@ -58,16 +58,23 @@ exports.deactivateUser = async (req, res) => {
 };
 
 exports.updatePermissions = async (req, res) => {
-  try {
-    const user = await User.findOneAndUpdate(
-      { _id: req.params.id, companyId: req.user.companyId },
-      { permissions: req.body.permissions },
-      { new: true }
-    );
-    res.json(user);
-  } catch (e) {
-    res.status(400).json({ msg: e.message });
+  if (req.user.role !== "owner") {
+    return res.status(403).json({ msg: "Solo el owner puede cambiar permisos" });
   }
+
+  const { userId, permissions } = req.body;
+
+  const updatedUser = await User.findOneAndUpdate(
+    { _id: userId, companyId: req.user.companyId },
+    { permissions },
+    { new: true }
+  ).select("-password");
+
+  if (!updatedUser) {
+    return res.status(404).json({ msg: "Usuario no encontrado" });
+  }
+
+  res.json(updatedUser);
 };
 
 exports.deleteUser = async (req, res) => {

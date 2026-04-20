@@ -1,82 +1,52 @@
-// controllers/stock.controller.js
 const stockService = require("../services/stock.service");
 
-// ✅ Obtener todo el stock de la empresa
-exports.getAll = async (req, res) => {
+// ✅ Ver inventario completo (solo materiales)
+exports.getInventory = async (req, res) => {
   try {
-    const items = await stockService.getAll(req.user.companyId);
-    return res.json(items);
+    const items = await stockService.getInventory(req.user.companyId);
+    res.json(items);
   } catch (err) {
-    return res.status(400).json({ msg: err.message });
+    res.status(400).json({ msg: err.message });
   }
 };
 
-// ✅ Obtener un item concreto
-exports.getOne = async (req, res) => {
+// ✅ Ver stock de un producto concreto
+exports.getByProduct = async (req, res) => {
   try {
-    const item = await stockService.getOne(req.user.companyId, req.params.id);
-    if (!item) return res.status(404).json({ msg: "Elemento de stock no encontrado." });
-
-    return res.json(item);
-  } catch (err) {
-    return res.status(400).json({ msg: err.message });
-  }
-};
-
-// ✅ Crear un item de stock
-exports.create = async (req, res) => {
-  try {
-    const item = await stockService.create(req.user.companyId, req.user.userId, req.body);
-    return res.status(201).json(item);
-  } catch (err) {
-    return res.status(400).json({ msg: err.message });
-  }
-};
-
-// ✅ Actualizar item de stock (categoría, nombre, límites, etc.)
-exports.update = async (req, res) => {
-  try {
-    const item = await stockService.update(
+    const item = await stockService.getByProduct(
       req.user.companyId,
-      req.params.id,
-      req.body
+      req.params.productId
     );
-    return res.json(item);
-  } catch (err) {
-    return res.status(400).json({ msg: err.message });
-  }
-};
 
-// ✅ Ajustar cantidad (+ / -)
-exports.adjustStock = async (req, res) => {
-  try {
-    const { amount } = req.body; // positivo o negativo
-
-    if (amount === undefined || isNaN(amount)) {
-      return res.status(400).json({ msg: "Debes enviar una cantidad válida." });
+    if (!item) {
+      return res.status(404).json({
+        msg: "Este producto no gestiona stock",
+      });
     }
 
-    const updated = await stockService.adjustStock(
+    res.json(item);
+  } catch (err) {
+    res.status(400).json({ msg: err.message });
+  }
+};
+
+// ✅ Ajustar stock (manual / consumo)
+exports.adjust = async (req, res) => {
+  try {
+    const { amount } = req.body;
+
+    if (!Number.isFinite(amount)) {
+      return res.status(400).json({ msg: "Cantidad inválida" });
+    }
+
+    const item = await stockService.adjust(
       req.user.companyId,
       req.params.id,
       amount
     );
 
-    return res.json({
-      msg: "Stock actualizado correctamente.",
-      item: updated,
-    });
+    res.json(item);
   } catch (err) {
-    return res.status(400).json({ msg: err.message });
-  }
-};
-
-// ✅ Eliminar item de stock
-exports.remove = async (req, res) => {
-  try {
-    await stockService.remove(req.user.companyId, req.params.id);
-    return res.json({ msg: "Item de stock eliminado correctamente." });
-  } catch (err) {
-    return res.status(400).json({ msg: err.message });
+    res.status(400).json({ msg: err.message });
   }
 };

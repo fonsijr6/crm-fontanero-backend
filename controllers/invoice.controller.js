@@ -29,7 +29,11 @@ exports.getInvoice = async (req, res) => {
       req.user.companyId,
       req.params.id
     );
-    if (!invoice) return res.status(404).json({ msg: "Factura no encontrada" });
+
+    if (!invoice) {
+      return res.status(404).json({ msg: "Factura no encontrada" });
+    }
+
     res.json(invoice);
   } catch (err) {
     res.status(400).json({ msg: err.message });
@@ -49,6 +53,7 @@ exports.updateInvoice = async (req, res) => {
   }
 };
 
+// ✅ Emitir / cancelar factura
 exports.updateInvoiceStatus = async (req, res) => {
   try {
     const invoice = await invoiceService.updateInvoiceStatus(
@@ -61,12 +66,4 @@ exports.updateInvoiceStatus = async (req, res) => {
     res.status(400).json({ msg: err.message });
   }
 };
-
-exports.deleteInvoice = async (req, res) => {
-  try {
-    await invoiceService.deleteInvoice(req.user.companyId, req.params.id);
-    res.json({ msg: "Factura eliminada correctamente" });
-  } catch (err) {
-    res.status(400).json({ msg: err.message });
-  }
-};
+``

@@ -42,6 +42,13 @@ router.put(
   controller.updateUser
 );
 
+// Actualizar permisos empleado
+router.put(
+  "/permissions",
+  auth,
+  controller.updatePermissions
+);
+
 // ✅ Desactivar empleado
 router.put(
   "/:id/deactivate",

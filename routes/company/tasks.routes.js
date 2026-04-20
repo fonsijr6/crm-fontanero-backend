@@ -8,12 +8,14 @@ const { auth } = require("../../middleware/auth.mw");
 const { requireRole } = require("../../middleware/requireRole");
 const { requireCompany } = require("../../middleware/requireCompany");
 const { auditAction } = require("../../middleware/auditAction");
+const { requirePermission } = require("../../middleware/requirePermission");
 
 router.post(
   "/",
   auth,
   requireRole(["owner", "admin", "worker"]),
   auditAction("Crear aviso", "task"),
+  requirePermission("task", "create"),
   controller.createTask
 );
 
@@ -21,6 +23,7 @@ router.get(
   "/",
   auth,
   requireRole(["owner", "admin", "worker", "viewer"]),
+  requirePermission("task", "view"),
   controller.getTasks
 );
 
@@ -38,6 +41,7 @@ router.put(
   requireCompany(Task),
   requireRole(["owner", "admin", "worker"]),
   auditAction("Actualizar aviso", "task"),
+  requirePermission("task", "edit"),
   controller.updateTask
 );
 
@@ -47,6 +51,7 @@ router.delete(
   requireCompany(Task),
   requireRole(["owner", "admin"]),
   auditAction("Eliminar aviso", "task"),
+  requirePermission("task", "delete"),
   controller.deleteTask
 );
 

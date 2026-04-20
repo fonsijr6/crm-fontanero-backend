@@ -1,5 +1,6 @@
 const productService = require("../services/product.service");
 
+// ✅ Crear producto (material o servicio)
 exports.createProduct = async (req, res) => {
   try {
     const product = await productService.createProduct(
@@ -14,6 +15,7 @@ exports.createProduct = async (req, res) => {
   }
 };
 
+// ✅ Listar productos activos
 exports.getProducts = async (req, res) => {
   try {
     const products = await productService.getProducts(req.user.companyId);
@@ -23,19 +25,25 @@ exports.getProducts = async (req, res) => {
   }
 };
 
+// ✅ Obtener producto por ID
 exports.getProduct = async (req, res) => {
   try {
     const product = await productService.getProduct(
       req.user.companyId,
       req.params.id
     );
-    if (!product) return res.status(404).json({ msg: "Producto no encontrado" });
+
+    if (!product) {
+      return res.status(404).json({ msg: "Producto no encontrado" });
+    }
+
     res.json(product);
   } catch (err) {
     res.status(400).json({ msg: err.message });
   }
 };
 
+// ✅ Actualizar producto (sin cambiar tipo)
 exports.updateProduct = async (req, res) => {
   try {
     const product = await productService.updateProduct(
@@ -43,16 +51,26 @@ exports.updateProduct = async (req, res) => {
       req.params.id,
       req.body
     );
+
     res.json(product);
   } catch (err) {
     res.status(400).json({ msg: err.message });
   }
 };
 
-exports.deleteProduct = async (req, res) => {
+// ✅ Desactivar producto (NO borrar)
+exports.deactivateProduct = async (req, res) => {
   try {
-    await productService.deleteProduct(req.user.companyId, req.params.id);
-    res.json({ msg: "Producto eliminado correctamente" });
+    const product = await productService.deactivateProduct(
+      req.user.companyId,
+      req.params.id,
+      req.user.userId
+    );
+
+    res.json({
+      msg: "Producto desactivado correctamente",
+      product,
+    });
   } catch (err) {
     res.status(400).json({ msg: err.message });
   }

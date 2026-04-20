@@ -8,12 +8,14 @@ const { auth } = require("../../middleware/auth.mw");
 const { requireRole } = require("../../middleware/requireRole");
 const { requireCompany } = require("../../middleware/requireCompany");
 const { auditAction } = require("../../middleware/auditAction");
+const { requirePermission } = require("../../middleware/requirePermission");
 
 // ✅ Crear cliente (owner, admin, worker)
 router.post(
   "/",
   auth,
   requireRole(["owner", "admin", "worker"]),
+  requirePermission("clients", "create"),
   auditAction("Crear cliente", "client"),
   controller.createClient
 );
@@ -23,6 +25,7 @@ router.get(
   "/",
   auth,
   requireRole(["owner", "admin", "worker", "viewer"]),
+  requirePermission("client", "view"),
   controller.getClients
 );
 
@@ -40,8 +43,9 @@ router.put(
   "/:id",
   auth,
   requireCompany(Client),
-  requireRole(["owner", "admin", "worker"]),
+  requireRole(["owner", "admin"]),
   auditAction("Actualizar cliente", "client"),
+  requirePermission("client", "edit"),
   controller.updateClient
 );
 
@@ -52,6 +56,7 @@ router.delete(
   requireCompany(Client),
   requireRole(["owner", "admin"]),
   auditAction("Eliminar cliente", "client"),
+  requirePermission("client", "delete"),
   controller.deleteClient
 );
 

@@ -31,10 +31,15 @@ module.exports = {
     });
   },
 
-  async getTasks(companyId) {
-    return await Task.find({ companyId })
-      .populate("clientId assignedTo")
-      .sort({ date: 1 });
+  async getTasks(companyId, clientId = null) {
+    const filter = { companyId };
+
+    if (clientId) {
+      filter.clientId = clientId;
+    }
+
+    return await Task.find(filter)
+      .populate("clientId assignedTo");
   },
 
   async getTask(companyId, taskId) {

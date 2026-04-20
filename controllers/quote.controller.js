@@ -7,7 +7,6 @@ exports.createQuote = async (req, res) => {
       req.user.userId,
       req.body
     );
-
     res.status(201).json(quote);
   } catch (err) {
     res.status(400).json({ msg: err.message });
@@ -29,7 +28,11 @@ exports.getQuote = async (req, res) => {
       req.user.companyId,
       req.params.id
     );
-    if (!quote) return res.status(404).json({ msg: "Presupuesto no encontrado" });
+
+    if (!quote) {
+      return res.status(404).json({ msg: "Presupuesto no encontrado" });
+    }
+
     res.json(quote);
   } catch (err) {
     res.status(400).json({ msg: err.message });
@@ -51,12 +54,12 @@ exports.updateQuote = async (req, res) => {
 
 exports.updateQuoteStatus = async (req, res) => {
   try {
-    const updated = await quoteService.updateQuoteStatus(
+    const quote = await quoteService.updateQuoteStatus(
       req.user.companyId,
       req.params.id,
       req.body.status
     );
-    res.json(updated);
+    res.json(quote);
   } catch (err) {
     res.status(400).json({ msg: err.message });
   }
@@ -64,17 +67,12 @@ exports.updateQuoteStatus = async (req, res) => {
 
 exports.convertQuoteToInvoice = async (req, res) => {
   try {
-    // Esto se implementará cuando generemos el flujo completo
-    res.json({ msg: "Función pendiente de implementar" });
-  } catch (err) {
-    res.status(400).json({ msg: err.message });
-  }
-};
-
-exports.deleteQuote = async (req, res) => {
-  try {
-    await quoteService.deleteQuote(req.user.companyId, req.params.id);
-    res.json({ msg: "Presupuesto eliminado correctamente" });
+    const invoice = await quoteService.convertToInvoice(
+      req.user.companyId,
+      req.user.userId,
+      req.params.id
+    );
+    res.json(invoice);
   } catch (err) {
     res.status(400).json({ msg: err.message });
   }

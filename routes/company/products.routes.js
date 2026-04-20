@@ -7,43 +7,54 @@ const controller = require("../../controllers/product.controller");
 const { auth } = require("../../middleware/auth.mw");
 const { requireRole } = require("../../middleware/requireRole");
 const { requireCompany } = require("../../middleware/requireCompany");
+const { requirePermission } = require("../../middleware/requirePermission");
 
+// ✅ Crear producto (material o servicio)
 router.post(
   "/",
   auth,
   requireRole(["owner", "admin"]),
+  requirePermission("product", "create"),
   controller.createProduct
 );
 
+// ✅ Listar productos activos
 router.get(
   "/",
   auth,
   requireRole(["owner", "admin", "worker", "viewer"]),
+  requirePermission("product", "view"),
   controller.getProducts
 );
 
+// ✅ Obtener producto por ID
 router.get(
   "/:id",
   auth,
   requireCompany(Product),
   requireRole(["owner", "admin", "worker", "viewer"]),
+  requirePermission("product", "view"),
   controller.getProduct
 );
 
+// ✅ Actualizar producto
 router.put(
   "/:id",
   auth,
   requireCompany(Product),
   requireRole(["owner", "admin"]),
+  requirePermission("product", "edit"),
   controller.updateProduct
 );
 
-router.delete(
-  "/:id",
+// ✅ Desactivar producto (NO borrar)
+router.put(
+  "/:id/deactivate",
   auth,
   requireCompany(Product),
-  requireRole(["owner"]),
-  controller.deleteProduct
+  requireRole(["owner", "admin"]),
+  requirePermission("product", "edit"),
+  controller.deactivateProduct
 );
 
 module.exports = router;

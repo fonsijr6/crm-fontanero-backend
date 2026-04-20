@@ -16,7 +16,13 @@ exports.createTask = async (req, res) => {
 
 exports.getTasks = async (req, res) => {
   try {
-    const tasks = await taskService.getTasks(req.user.companyId);
+    const { clientId } = req.query;
+
+    const tasks = await taskService.getTasks(
+      req.user.companyId,
+      clientId
+    );
+
     res.json(tasks);
   } catch (err) {
     res.status(400).json({ msg: err.message });

@@ -37,7 +37,13 @@ const userSchema = new mongoose.Schema(
 
     permissions: {
       type: Object,
-      default: {}
+      default: {
+        clients:  { view: true, create: false, edit: false, delete: false },
+        tasks:    { view: true, create: false, edit: false, delete: false },
+        products: { view: true, create: false, edit: false, delete: false },
+        stock:    { view: true, edit: false },
+        users:    { view: false, create: false, edit: false, delete: false }
+      }
     },
 
     isActive: { type: Boolean, default: true },
