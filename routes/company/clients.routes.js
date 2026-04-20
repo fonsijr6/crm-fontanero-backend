@@ -16,7 +16,7 @@ router.post(
   auth,
   requireRole(["owner", "admin", "worker"]),
   requirePermission("clients", "create"),
-  auditAction("Crear cliente", "client"),
+  auditAction("Crear cliente", "clients"),
   controller.createClient
 );
 
@@ -25,7 +25,7 @@ router.get(
   "/",
   auth,
   requireRole(["owner", "admin", "worker", "viewer"]),
-  requirePermission("client", "view"),
+  requirePermission("clients", "view"),
   controller.getClients
 );
 
@@ -44,8 +44,8 @@ router.put(
   auth,
   requireCompany(Client),
   requireRole(["owner", "admin"]),
-  auditAction("Actualizar cliente", "client"),
-  requirePermission("client", "edit"),
+  auditAction("Actualizar cliente", "clients"),
+  requirePermission("clients", "edit"),
   controller.updateClient
 );
 
@@ -55,8 +55,8 @@ router.delete(
   auth,
   requireCompany(Client),
   requireRole(["owner", "admin"]),
-  auditAction("Eliminar cliente", "client"),
-  requirePermission("client", "delete"),
+  auditAction("Eliminar cliente", "clients"),
+  requirePermission("clients", "delete"),
   controller.deleteClient
 );
 

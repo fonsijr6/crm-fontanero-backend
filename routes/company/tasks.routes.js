@@ -14,8 +14,8 @@ router.post(
   "/",
   auth,
   requireRole(["owner", "admin", "worker"]),
-  auditAction("Crear aviso", "task"),
-  requirePermission("task", "create"),
+  auditAction("Crear aviso", "tasks"),
+  requirePermission("tasks", "create"),
   controller.createTask
 );
 
@@ -23,7 +23,7 @@ router.get(
   "/",
   auth,
   requireRole(["owner", "admin", "worker", "viewer"]),
-  requirePermission("task", "view"),
+  requirePermission("tasks", "view"),
   controller.getTasks
 );
 
@@ -40,8 +40,8 @@ router.put(
   auth,
   requireCompany(Task),
   requireRole(["owner", "admin", "worker"]),
-  auditAction("Actualizar aviso", "task"),
-  requirePermission("task", "edit"),
+  auditAction("Actualizar aviso", "tasks"),
+  requirePermission("tasks", "edit"),
   controller.updateTask
 );
 
@@ -50,8 +50,8 @@ router.delete(
   auth,
   requireCompany(Task),
   requireRole(["owner", "admin"]),
-  auditAction("Eliminar aviso", "task"),
-  requirePermission("task", "delete"),
+  auditAction("Eliminar aviso", "tasks"),
+  requirePermission("tasks", "delete"),
   controller.deleteTask
 );
 

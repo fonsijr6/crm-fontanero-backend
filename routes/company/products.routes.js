@@ -14,7 +14,7 @@ router.post(
   "/",
   auth,
   requireRole(["owner", "admin"]),
-  requirePermission("product", "create"),
+  requirePermission("products", "create"),
   controller.createProduct
 );
 
@@ -23,7 +23,7 @@ router.get(
   "/",
   auth,
   requireRole(["owner", "admin", "worker", "viewer"]),
-  requirePermission("product", "view"),
+  requirePermission("products", "view"),
   controller.getProducts
 );
 
@@ -33,7 +33,7 @@ router.get(
   auth,
   requireCompany(Product),
   requireRole(["owner", "admin", "worker", "viewer"]),
-  requirePermission("product", "view"),
+  requirePermission("products", "view"),
   controller.getProduct
 );
 
@@ -43,7 +43,7 @@ router.put(
   auth,
   requireCompany(Product),
   requireRole(["owner", "admin"]),
-  requirePermission("product", "edit"),
+  requirePermission("products", "edit"),
   controller.updateProduct
 );
 
@@ -53,7 +53,7 @@ router.put(
   auth,
   requireCompany(Product),
   requireRole(["owner", "admin"]),
-  requirePermission("product", "edit"),
+  requirePermission("products", "edit"),
   controller.deactivateProduct
 );
 

@@ -15,8 +15,8 @@ router.post(
   "/",
   auth,
   requireRole(["owner", "admin"]),
-  requirePermission("invoice", "create"),
-  auditAction("Crear factura", "invoice"),
+  requirePermission("invoices", "create"),
+  auditAction("Crear factura", "invoices"),
   controller.createInvoice
 );
 
@@ -25,7 +25,7 @@ router.get(
   "/",
   auth,
   requireRole(["owner", "admin", "worker", "viewer"]),
-  requirePermission("invoice", "view"),
+  requirePermission("invoices", "view"),
   controller.getInvoices
 );
 
@@ -35,7 +35,7 @@ router.get(
   auth,
   requireCompany(Invoice),
   requireRole(["owner", "admin", "worker", "viewer"]),
-  requirePermission("invoice", "view"),
+  requirePermission("invoices", "view"),
   controller.getInvoice
 );
 
@@ -45,8 +45,8 @@ router.put(
   auth,
   requireCompany(Invoice),
   requireRole(["owner", "admin"]),
-  requirePermission("invoice", "edit"),
-  auditAction("Actualizar factura", "invoice"),
+  requirePermission("invoices", "edit"),
+  auditAction("Actualizar factura", "invoices"),
   controller.updateInvoice
 );
 
@@ -56,8 +56,8 @@ router.put(
   auth,
   requireCompany(Invoice),
   requireRole(["owner", "admin"]),
-  requirePermission("invoice", "edit"),
-  auditAction("Cambiar estado factura", "invoice"),
+  requirePermission("invoices", "edit"),
+  auditAction("Cambiar estado factura", "invoices"),
   controller.updateInvoiceStatus
 );
 
