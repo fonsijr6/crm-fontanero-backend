@@ -7,6 +7,7 @@ const controller = require("../../controllers/invoice.controller");
 const { auth } = require("../../middleware/auth.mw");
 const { requireCompany } = require("../../middleware/requireCompany");
 const { requirePermission } = require("../../middleware/requirePermission");
+const { requireRole } = require("../../middleware/requireRole");
 const { auditAction } = require("../../middleware/auditAction");
 
 // Crear factura
@@ -29,6 +30,15 @@ router.get(
   auth,
   requirePermission("invoices", "view"),
   controller.getInvoices
+);
+
+// Obtener factura concreto
+router.get(
+  "/:id",
+  auth,
+  requireCompany(Invoice),
+  requireRole(["owner", "admin", "worker", "viewer"]),
+  controller.getInvoice
 );
 
 // Cambiar estado factura

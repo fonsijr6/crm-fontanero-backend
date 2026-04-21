@@ -7,6 +7,7 @@ const controller = require("../../controllers/task.controller");
 const { auth } = require("../../middleware/auth.mw");
 const { requireCompany } = require("../../middleware/requireCompany");
 const { requirePermission } = require("../../middleware/requirePermission");
+const { requireRole } = require("../../middleware/requireRole");
 const { auditAction } = require("../../middleware/auditAction");
 
 // Crear aviso
@@ -29,6 +30,15 @@ router.get(
   auth,
   requirePermission("tasks", "view"),
   controller.getTasks
+);
+
+// Obtener aviso concreto
+router.get(
+  "/:id",
+  auth,
+  requireCompany(Task),
+  requireRole(["owner", "admin", "worker", "viewer"]),
+  controller.getTask
 );
 
 // Actualizar aviso

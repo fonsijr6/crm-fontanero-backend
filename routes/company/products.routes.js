@@ -33,6 +33,15 @@ router.get(
   controller.getProducts
 );
 
+// Obtener producto concreto
+router.get(
+  "/:id",
+  auth,
+  requireCompany(Product),
+  requireRole(["owner", "admin", "worker", "viewer"]),
+  controller.getProduct
+);
+
 // Actualizar producto
 router.put(
   "/:id",
