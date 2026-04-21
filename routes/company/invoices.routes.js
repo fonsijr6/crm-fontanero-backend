@@ -47,7 +47,7 @@ router.put(
       to: res.locals.invoice?.status,
     }),
   }),
-  controller.setStatus
+  controller.updateInvoiceStatus
 );
 
 module.exports = router;

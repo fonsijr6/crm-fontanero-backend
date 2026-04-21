@@ -76,7 +76,7 @@ exports.updateInvoiceStatus = async (req, res) => {
       req.params.id,
       status
     );
-
+    res.locals.invoice = invoice;
     res.json(invoice);
   } catch (err) {
     res.status(400).json({ msg: err.message });

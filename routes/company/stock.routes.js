@@ -9,14 +9,14 @@ router.get(
   "/",
   auth,
   requirePermission("stock", "view"),
-  controller.getStock
+  controller.getInventory
 );
 
 router.post(
   "/adjust",
   auth,
   requirePermission("stock", "edit"),
-  controller.adjustStock // aquí se llama auditService.log() manual
+  controller.adjust // aquí se llama auditService.log() manual
 );
 
 module.exports = router;
