@@ -64,8 +64,8 @@ const invoiceSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
-
-    clientId: {
+    
+    client: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Client",
       required: true,

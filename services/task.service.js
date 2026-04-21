@@ -3,22 +3,14 @@ const Task = require("../models/Task");
 module.exports = {
   async createTask(companyId, userId, data) {
     if (!companyId) throw new Error("La empresa es obligatoria.");
-
-    if (!data.title || data.title.trim().length === 0)
-      throw new Error("El título de la tarea es obligatorio.");
-    if (data.title.length > 80)
-      throw new Error("El título no puede superar los 80 caracteres.");
-
-    if (data.description && data.description.length > 500)
-      throw new Error("La descripción no puede superar los 500 caracteres.");
-
-    if (!data.clientId)
+    if (!data.title?.trim()) throw new Error("Título obligatorio.");
+    if (!data.client && !data.clientId)
       throw new Error("La tarea debe estar vinculada a un cliente.");
 
-    return await Task.create({
+    return Task.create({
       companyId,
       createdBy: userId,
-      clientId: data.clientId,
+      client: data.client ?? data.clientId,
       assignedTo: data.assignedTo || null,
       title: data.title.trim(),
       description: data.description || "",
@@ -33,38 +25,36 @@ module.exports = {
 
   async getTasks(companyId, clientId = null) {
     const filter = { companyId };
+    if (clientId) filter.client = clientId;
 
-    if (clientId) {
-      filter.clientId = clientId;
-    }
-
-    return await Task.find(filter)
-      .populate("clientId assignedTo");
+    return Task.find(filter)
+      .sort({ createdAt: -1 })
+      .populate("client", "name email")
+      .populate("assignedTo", "name role email");
   },
 
   async getTask(companyId, taskId) {
-    return await Task.findOne({ _id: taskId, companyId })
-      .populate("clientId assignedTo");
+    return Task.findOne({ _id: taskId, companyId })
+      .populate("client", "name email")
+      .populate("assignedTo", "name role email");
   },
 
   async updateTask(companyId, taskId, data) {
-    if (data.title && data.title.length > 80)
-      throw new Error("El título no puede superar los 80 caracteres.");
+    if (data.clientId) {
+      data.client = data.clientId;
+      delete data.clientId;
+    }
 
-    if (data.description && data.description.length > 500)
-      throw new Error("La descripción no puede superar los 500 caracteres.");
-
-    if (data.images && data.images.length > 20)
-      throw new Error("No puedes añadir más de 20 imágenes.");
-
-    return await Task.findOneAndUpdate(
+    return Task.findOneAndUpdate(
       { _id: taskId, companyId },
       data,
       { new: true }
-    );
+    )
+      .populate("client", "name email")
+      .populate("assignedTo", "name role email");
   },
 
   async deleteTask(companyId, taskId) {
-    return await Task.deleteOne({ _id: taskId, companyId });
+    return Task.deleteOne({ _id: taskId, companyId });
   },
 };

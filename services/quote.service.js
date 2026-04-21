@@ -18,22 +18,26 @@ module.exports = {
       company.settings.lastQuoteNumber
     );
 
-    return await Quote.create({
+    return Quote.create({
       companyId,
       createdBy: userId,
       quoteNumber,
       status: "draft",
+      client: data.client ?? data.clientId,
       ...data,
     });
   },
 
   async getQuotes(companyId) {
-    return await Quote.find({ companyId })
-      .sort({ createdAt: -1 });
+    return Quote.find({ companyId })
+      .sort({ createdAt: -1 })
+      .populate("client", "name email");
   },
 
   async getQuote(companyId, quoteId) {
-    return await Quote.findOne({ _id: quoteId, companyId });
+    return Quote.findOne({ _id: quoteId, companyId })
+      .populate("client", "name email")
+      .populate("items.productId", "name unit");
   },
 
   async updateQuote(companyId, quoteId, data) {
@@ -46,6 +50,11 @@ module.exports = {
 
     if (data.items && data.items.length > 100) {
       throw new Error("No puedes añadir más de 100 líneas.");
+    }
+
+    if (data.clientId) {
+      data.client = data.clientId;
+      delete data.clientId;
     }
 
     Object.assign(quote, data);
@@ -88,13 +97,13 @@ module.exports = {
       company.settings.invoicePrefix,
       company.settings.lastInvoiceNumber
     );
-    
+
     const invoice = await Invoice.create({
       companyId,
       createdBy: userId,
       invoiceNumber,
-      clientId: quote.clientId,
-      items: quote.items, // ✅ ya incluyen productType, unit, price
+      client: quote.client,
+      items: quote.items,
       status: "draft",
       quoteId: quote._id,
       subtotal: quote.subtotal,
@@ -107,5 +116,5 @@ module.exports = {
     await quote.save();
 
     return invoice;
-  }
+  },
 };

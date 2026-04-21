@@ -8,6 +8,8 @@ exports.createQuote = async (req, res) => {
       req.user.userId,
       req.body
     );
+
+    res.locals.quote = quote;
     res.status(201).json(quote);
   } catch (err) {
     res.status(400).json({ msg: err.message });
@@ -42,7 +44,7 @@ exports.getQuote = async (req, res) => {
   }
 };
 
-// ✅ Editar presupuesto (solo si NO está convertido)
+// ✅ Editar presupuesto (solo si no está convertido)
 exports.updateQuote = async (req, res) => {
   try {
     const quote = await quoteService.updateQuote(
@@ -50,6 +52,8 @@ exports.updateQuote = async (req, res) => {
       req.params.id,
       req.body
     );
+
+    res.locals.quote = quote;
     res.json(quote);
   } catch (err) {
     res.status(400).json({ msg: err.message });
@@ -60,7 +64,6 @@ exports.updateQuote = async (req, res) => {
 exports.updateQuoteStatus = async (req, res) => {
   try {
     const { status } = req.body;
-
     if (!status) {
       return res.status(400).json({ msg: "Estado requerido" });
     }
@@ -71,6 +74,7 @@ exports.updateQuoteStatus = async (req, res) => {
       status
     );
 
+    res.locals.quote = quote;
     res.json(quote);
   } catch (err) {
     res.status(400).json({ msg: err.message });
@@ -85,6 +89,8 @@ exports.convertQuoteToInvoice = async (req, res) => {
       req.user.userId,
       req.params.id
     );
+
+    res.locals.invoice = invoice;
     res.json(invoice);
   } catch (err) {
     res.status(400).json({ msg: err.message });

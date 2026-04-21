@@ -7,8 +7,8 @@ exports.createTask = async (req, res) => {
       req.user.userId,
       req.body
     );
+
     res.locals.task = task;
-    res.json(task);
     res.status(201).json(task);
   } catch (err) {
     res.status(400).json({ msg: err.message });
@@ -36,7 +36,11 @@ exports.getTask = async (req, res) => {
       req.user.companyId,
       req.params.id
     );
-    if (!task) return res.status(404).json({ msg: "Tarea no encontrada" });
+
+    if (!task) {
+      return res.status(404).json({ msg: "Tarea no encontrada" });
+    }
+
     res.json(task);
   } catch (err) {
     res.status(400).json({ msg: err.message });
@@ -50,6 +54,7 @@ exports.updateTask = async (req, res) => {
       req.params.id,
       req.body
     );
+
     res.locals.task = task;
     res.json(task);
   } catch (err) {
@@ -59,9 +64,7 @@ exports.updateTask = async (req, res) => {
 
 exports.deleteTask = async (req, res) => {
   try {
-    const task = await taskService.deleteTask(req.user.companyId, req.params.id);
-    res.locals.task = task;
-    res.json(task);
+    await taskService.deleteTask(req.user.companyId, req.params.id);
     res.json({ msg: "Tarea eliminada correctamente" });
   } catch (err) {
     res.status(400).json({ msg: err.message });

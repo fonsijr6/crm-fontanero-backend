@@ -4,7 +4,6 @@ const stockService = require("./stock.service");
 const { generateDocumentNumber } = require("../utils/docNumber");
 
 module.exports = {
-
   async createInvoice(companyId, userId, data) {
     if (!companyId) throw new Error("La empresa es obligatoria.");
 
@@ -19,16 +18,34 @@ module.exports = {
       company.settings.lastInvoiceNumber
     );
 
-    return await Invoice.create({
+    return Invoice.create({
       companyId,
       createdBy: userId,
       invoiceNumber,
       status: "draft",
+      client: data.client ?? data.clientId,
       ...data,
     });
   },
 
+  async getInvoices(companyId) {
+    return Invoice.find({ companyId })
+      .sort({ createdAt: -1 })
+      .populate("client", "name email");
+  },
+
+  async getInvoice(companyId, invoiceId) {
+    return Invoice.findOne({ _id: invoiceId, companyId })
+      .populate("client", "name email")
+      .populate("items.productId", "name unit");
+  },
+
   async updateInvoice(companyId, invoiceId, data) {
+    if (data.clientId) {
+      data.client = data.clientId;
+      delete data.clientId;
+    }
+
     const invoice = await Invoice.findOne({ _id: invoiceId, companyId });
     if (!invoice) throw new Error("Factura no encontrada.");
 
@@ -38,30 +55,16 @@ module.exports = {
 
     Object.assign(invoice, data);
     await invoice.save();
-
     return invoice;
   },
 
-  // 🔥 CAMBIO DE ESTADO CON CONSUMO DE STOCK
   async updateInvoiceStatus(companyId, invoiceId, newStatus) {
     const invoice = await Invoice.findOne({ _id: invoiceId, companyId });
     if (!invoice) throw new Error("Factura no encontrada.");
 
-    const allowed = ["draft", "sent", "paid", "cancelled"];
-    if (!allowed.includes(newStatus)) {
-      throw new Error("Estado de factura no válido.");
-    }
-
-    // ❌ No volver atrás
-    if (invoice.status === "sent" && newStatus === "draft") {
-      throw new Error("No se puede volver a borrador una factura emitida.");
-    }
-
-    // 🔥 CONSUMIR STOCK AL EMITIR
     if (invoice.status === "draft" && newStatus === "sent") {
       for (const item of invoice.items) {
         if (item.productType === "material") {
-          // cantidad negativa = consumo
           await stockService.adjust(
             companyId,
             item.productId,
@@ -71,22 +74,12 @@ module.exports = {
       }
     }
 
-    // ✅ Marcar como pagada
     if (newStatus === "paid") {
       invoice.paidAt = new Date();
     }
 
     invoice.status = newStatus;
     await invoice.save();
-
     return invoice;
   },
-
-  async getInvoices(companyId) {
-    return await Invoice.find({ companyId }).sort({ createdAt: -1 });
-  },
-
-  async getInvoice(companyId, invoiceId) {
-    return await Invoice.findOne({ _id: invoiceId, companyId });
-  }
 };
