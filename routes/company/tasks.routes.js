@@ -47,6 +47,7 @@ router.put(
   auth,
   requireCompany(Task),
   requirePermission("tasks", "edit"),
+  requireRole(["owner", "admin", "worker", "viewer"]),
   auditAction({
     module: "tasks",
     action: "update",
@@ -62,6 +63,7 @@ router.delete(
   auth,
   requireCompany(Task),
   requirePermission("tasks", "delete"),
+  requireRole(["owner", "admin"]),
   auditAction({
     module: "tasks",
     action: "delete",

@@ -39,7 +39,7 @@ exports.updatePermissions = async (req, res) => {
 
   const user = await userService.updatePermissions(
     req.user.companyId,
-    req.body.userId,
+    req.params.id,
     req.body.permissions
   );
 

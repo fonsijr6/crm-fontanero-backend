@@ -21,7 +21,7 @@ router.get("/:id", auth, requireCompany(User), requireRole(["owner", "admin"]), 
 router.put("/:id", auth, requireCompany(User), requireRole(["owner"]), controller.updateUser);
 
 // Cambiar permisos
-router.put("/permissions", auth, requireRole(["owner"]), controller.updatePermissions);
+router.put("/:id/permissions", auth, requireRole(["owner"]), controller.updatePermissions);
 
 // Desactivar empleado
 router.put("/:id/deactivate", auth, requireCompany(User), requireRole(["owner"]), controller.deactivateUser);
