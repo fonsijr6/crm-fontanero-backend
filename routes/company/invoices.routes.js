@@ -5,60 +5,49 @@ const Invoice = require("../../models/Invoice");
 const controller = require("../../controllers/invoice.controller");
 
 const { auth } = require("../../middleware/auth.mw");
-const { requireRole } = require("../../middleware/requireRole");
 const { requireCompany } = require("../../middleware/requireCompany");
-const { auditAction } = require("../../middleware/auditAction");
 const { requirePermission } = require("../../middleware/requirePermission");
+const { auditAction } = require("../../middleware/auditAction");
 
-// ✅ Crear factura (owner, admin)
+// Crear factura
 router.post(
   "/",
   auth,
-  requireRole(["owner", "admin"]),
   requirePermission("invoices", "create"),
-  auditAction("Crear factura", "invoices"),
+  auditAction({
+    module: "invoices",
+    action: "create",
+    getEntityLabel: (req, res) =>
+      `Factura ${res.locals.invoice?.invoiceNumber}`,
+  }),
   controller.createInvoice
 );
 
-// ✅ Listar facturas
+// Listar facturas
 router.get(
   "/",
   auth,
-  requireRole(["owner", "admin", "worker", "viewer"]),
   requirePermission("invoices", "view"),
   controller.getInvoices
 );
 
-// ✅ Obtener factura por ID
-router.get(
-  "/:id",
-  auth,
-  requireCompany(Invoice),
-  requireRole(["owner", "admin", "worker", "viewer"]),
-  requirePermission("invoices", "view"),
-  controller.getInvoice
-);
-
-// ✅ Actualizar factura (SOLO si está draft)
-router.put(
-  "/:id",
-  auth,
-  requireCompany(Invoice),
-  requireRole(["owner", "admin"]),
-  requirePermission("invoices", "edit"),
-  auditAction("Actualizar factura", "invoices"),
-  controller.updateInvoice
-);
-
-// ✅ Cambiar estado de factura (emitir / cancelar)
+// Cambiar estado factura
 router.put(
   "/:id/status",
   auth,
   requireCompany(Invoice),
-  requireRole(["owner", "admin"]),
   requirePermission("invoices", "edit"),
-  auditAction("Cambiar estado factura", "invoices"),
-  controller.updateInvoiceStatus
+  auditAction({
+    module: "invoices",
+    action: "status_change",
+    getEntityLabel: (req, res) =>
+      `Factura ${res.locals.invoice?.invoiceNumber}`,
+    getMeta: (req, res) => ({
+      from: res.locals.prevStatus,
+      to: res.locals.invoice?.status,
+    }),
+  }),
+  controller.setStatus
 );
 
 module.exports = router;

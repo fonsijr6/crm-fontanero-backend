@@ -5,53 +5,59 @@ const Task = require("../../models/Task");
 const controller = require("../../controllers/task.controller");
 
 const { auth } = require("../../middleware/auth.mw");
-const { requireRole } = require("../../middleware/requireRole");
 const { requireCompany } = require("../../middleware/requireCompany");
-const { auditAction } = require("../../middleware/auditAction");
 const { requirePermission } = require("../../middleware/requirePermission");
+const { auditAction } = require("../../middleware/auditAction");
 
+// Crear aviso
 router.post(
   "/",
   auth,
-  requireRole(["owner", "admin", "worker"]),
-  auditAction("Crear aviso", "tasks"),
   requirePermission("tasks", "create"),
+  auditAction({
+    module: "tasks",
+    action: "create",
+    getEntityLabel: (req, res) =>
+      res.locals.task?.title || req.body.title,
+  }),
   controller.createTask
 );
 
+// Listar avisos
 router.get(
   "/",
   auth,
-  requireRole(["owner", "admin", "worker", "viewer"]),
   requirePermission("tasks", "view"),
   controller.getTasks
 );
 
-router.get(
-  "/:id",
-  auth,
-  requireCompany(Task),
-  requireRole(["owner", "admin", "worker", "viewer"]),
-  controller.getTask
-);
-
+// Actualizar aviso
 router.put(
   "/:id",
   auth,
   requireCompany(Task),
-  requireRole(["owner", "admin", "worker"]),
-  auditAction("Actualizar aviso", "tasks"),
   requirePermission("tasks", "edit"),
+  auditAction({
+    module: "tasks",
+    action: "update",
+    getEntityLabel: (req, res) =>
+      res.locals.task?.title || req.body.title,
+  }),
   controller.updateTask
 );
 
+// Eliminar aviso
 router.delete(
   "/:id",
   auth,
   requireCompany(Task),
-  requireRole(["owner", "admin"]),
-  auditAction("Eliminar aviso", "tasks"),
   requirePermission("tasks", "delete"),
+  auditAction({
+    module: "tasks",
+    action: "delete",
+    getEntityLabel: (req, res) =>
+      res.locals.task?.title,
+  }),
   controller.deleteTask
 );
 

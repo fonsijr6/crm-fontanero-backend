@@ -1,4 +1,3 @@
-// routes/company/products.routes.js
 const express = require("express");
 const router = express.Router();
 
@@ -9,6 +8,7 @@ const { auth } = require("../../middleware/auth.mw");
 const { requireRole } = require("../../middleware/requireRole");
 const { requireCompany } = require("../../middleware/requireCompany");
 const { requirePermission } = require("../../middleware/requirePermission");
+const { auditAction } = require("../../middleware/auditAction");
 
 // Crear producto
 router.post(
@@ -16,6 +16,12 @@ router.post(
   auth,
   requireRole(["owner", "admin"]),
   requirePermission("products", "create"),
+  auditAction({
+    module: "products",
+    action: "create",
+    getEntityLabel: (req, res) =>
+      res.locals.product?.name || req.body.name,
+  }),
   controller.createProduct
 );
 
@@ -23,19 +29,8 @@ router.post(
 router.get(
   "/",
   auth,
-  requireRole(["owner", "admin", "worker", "viewer"]),
   requirePermission("products", "view"),
   controller.getProducts
-);
-
-// Ver producto
-router.get(
-  "/:id",
-  auth,
-  requireCompany(Product),
-  requireRole(["owner", "admin", "worker", "viewer"]),
-  requirePermission("products", "view"),
-  controller.getProduct
 );
 
 // Actualizar producto
@@ -43,18 +38,28 @@ router.put(
   "/:id",
   auth,
   requireCompany(Product),
-  requireRole(["owner", "admin"]),
   requirePermission("products", "edit"),
+  auditAction({
+    module: "products",
+    action: "update",
+    getEntityLabel: (req, res) =>
+      res.locals.product?.name || req.body.name,
+  }),
   controller.updateProduct
 );
 
-// ✅ ELIMINAR PRODUCTO (solo owner)
+// Eliminar producto
 router.delete(
   "/:id",
   auth,
   requireCompany(Product),
-  requireRole(["owner"]),
   requirePermission("products", "delete"),
+  auditAction({
+    module: "products",
+    action: "delete",
+    getEntityLabel: (req, res) =>
+      res.locals.product?.name,
+  }),
   controller.deleteProduct
 );
 

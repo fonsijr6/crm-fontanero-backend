@@ -8,6 +8,8 @@ exports.createInvoice = async (req, res) => {
       req.user.userId,
       req.body
     );
+    res.locals.invoice = invoice;
+    res.json(invoice);
     res.status(201).json(invoice);
   } catch (err) {
     res.status(400).json({ msg: err.message });
@@ -50,6 +52,7 @@ exports.updateInvoice = async (req, res) => {
       req.params.id,
       req.body
     );
+    res.locals.invoice = invoice;
     res.json(invoice);
   } catch (err) {
     res.status(400).json({ msg: err.message });

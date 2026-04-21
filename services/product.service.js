@@ -34,7 +34,7 @@ module.exports = {
       unitPrice: data.unitPrice,
       taxRate: data.taxRate ?? 21,
       unit: data.unit || "unidad",
-      sku: data.sku?.trim() || "",
+      category: data.category?.trim() || "",
       imageUrl: data.imageUrl || "",
       isActive: true,
     });

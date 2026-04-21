@@ -46,7 +46,7 @@ const productSchema = new mongoose.Schema(
       default: "unidad", // unidad, hora, metro, kg...
     },
 
-    sku: {
+    category: {
       type: String,
       trim: true,
       default: "",

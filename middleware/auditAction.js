@@ -1,18 +1,27 @@
 const auditService = require("../services/audit.service");
 
-module.exports.auditAction = (action, module) => {
+module.exports.auditAction = ({
+  module,
+  action,
+  getEntityId,
+  getEntityLabel,
+  getMeta,
+}) => {
   return async (req, res, next) => {
     res.on("finish", async () => {
       try {
-        if (res.statusCode < 400) {
+        if (res.statusCode < 400 && req.user) {
           await auditService.log({
             companyId: req.user.companyId,
             userId: req.user.userId,
-            action,
             module,
-            entityId: req.params.id || null,
-            ip: req.ip,
-            userAgent: req.headers["user-agent"]
+            action,
+
+            entityId: getEntityId ? getEntityId(req, res) : req.params.id || null,
+            entityLabel: getEntityLabel ? getEntityLabel(req, res) : null,
+            meta: getMeta ? getMeta(req, res) : null,
+
+            req,
           });
         }
       } catch (e) {

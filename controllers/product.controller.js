@@ -8,7 +8,8 @@ exports.createProduct = async (req, res) => {
       req.user.userId,
       req.body
     );
-
+    res.locals.product = product;
+    res.json(product);
     res.status(201).json(product);
   } catch (err) {
     res.status(400).json({ msg: err.message });
@@ -51,7 +52,7 @@ exports.updateProduct = async (req, res) => {
       req.params.id,
       req.body
     );
-
+    res.locals.product = product;
     res.json(product);
   } catch (err) {
     res.status(400).json({ msg: err.message });
@@ -61,11 +62,12 @@ exports.updateProduct = async (req, res) => {
 // ✅ Eliminar producto
 exports.deleteProduct = async (req, res) => {
   try {
-    await productService.deleteProduct(
+    const product = await productService.deleteProduct(
       req.user.companyId,
       req.params.id
     );
-
+    res.locals.product = product;
+    res.json(product);
     res.json({ msg: "Producto eliminado correctamente" });
   } catch (err) {
     res.status(400).json({ msg: err.message });
