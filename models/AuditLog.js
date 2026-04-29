@@ -1,43 +1,57 @@
 const mongoose = require("mongoose");
-
 const auditLogSchema = new mongoose.Schema(
   {
     companyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Company",
       required: true,
-      index: true
+      index: true,
     },
 
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true
+      index: true,
     },
 
-    action: { 
-      type: String, 
+    module: {
+      type: String, // clients, products, stock, invoices, tasks
       required: true,
-      maxlength: 200 
+      index: true,
+      maxlength: 50,
     },
 
-    module: { // clients, invoices, tasks…
+    action: {
+      type: String, // create, update, delete, adjust, status_change
+      required: true,
+      index: true,
+      maxlength: 100,
+    },
+
+    entityId: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: null,
+      index: true,
+    },
+
+    // ✅ NUEVO: texto legible
+    entityLabel: {
       type: String,
-      required: true,
-      maxlength: 50
+      maxlength: 200,
     },
 
-    entityId: { 
-      type: String, 
-      default: null 
+    // ✅ NUEVO: info del cambio
+    meta: {
+      type: mongoose.Schema.Types.Mixed,
     },
 
-    ip: { type: String },          // IP del usuario
-    userAgent: { type: String },   // Navegador / móvil
-
+    ip: String,
+    userAgent: String,
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
 module.exports = mongoose.model("AuditLog", auditLogSchema);

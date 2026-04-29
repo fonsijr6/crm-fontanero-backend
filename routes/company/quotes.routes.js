@@ -7,12 +7,14 @@ const controller = require("../../controllers/quote.controller");
 const { auth } = require("../../middleware/auth.mw");
 const { requireRole } = require("../../middleware/requireRole");
 const { requireCompany } = require("../../middleware/requireCompany");
+const { requirePermission } = require("../../middleware/requirePermission");
 
-// ✅ Crear presupuesto (owner, admin, worker)
+// ✅ Crear presupuesto (draft)
 router.post(
   "/",
   auth,
-  requireRole(["owner", "admin", "worker"]),
+  requireRole(["owner", "admin"]),
+  requirePermission("quotes", "create"),
   controller.createQuote
 );
 
@@ -21,6 +23,7 @@ router.get(
   "/",
   auth,
   requireRole(["owner", "admin", "worker", "viewer"]),
+  requirePermission("quotes", "view"),
   controller.getQuotes
 );
 
@@ -30,24 +33,27 @@ router.get(
   auth,
   requireCompany(Quote),
   requireRole(["owner", "admin", "worker", "viewer"]),
+  requirePermission("quotes", "view"),
   controller.getQuote
 );
 
-// ✅ Editar presupuesto (solo si está pending)
+// ✅ Editar presupuesto (solo si draft)
 router.put(
   "/:id",
   auth,
   requireCompany(Quote),
   requireRole(["owner", "admin"]),
+  requirePermission("quotes", "edit"),
   controller.updateQuote
 );
 
-// ✅ Cambiar estado (aceptado / rechazado)
+// ✅ Cambiar estado (accepted / rejected)
 router.put(
   "/:id/status",
   auth,
   requireCompany(Quote),
   requireRole(["owner", "admin"]),
+  requirePermission("quotes", "edit"),
   controller.updateQuoteStatus
 );
 
@@ -57,16 +63,8 @@ router.post(
   auth,
   requireCompany(Quote),
   requireRole(["owner", "admin"]),
+  requirePermission("quotes", "convert"),
   controller.convertQuoteToInvoice
-);
-
-// ✅ Eliminar presupuesto
-router.delete(
-  "/:id",
-  auth,
-  requireCompany(Quote),
-  requireRole(["owner"]),
-  controller.deleteQuote
 );
 
 module.exports = router;

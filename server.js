@@ -38,6 +38,7 @@ app.use("/api/company/products", require("./routes/company/products.routes"));
 app.use("/api/company/quotes", require("./routes/company/quotes.routes"));
 app.use("/api/company/invoices", require("./routes/company/invoices.routes"));
 app.use("/api/company/stock", require("./routes/company/stock.routes"));
+app.use("/api/company/audit", require("./routes/company/audit.routes"));
 
 /* ✅ START */
 const PORT = process.env.PORT || 4000;

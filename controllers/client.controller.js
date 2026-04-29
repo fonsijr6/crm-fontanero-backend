@@ -8,6 +8,9 @@ exports.createClient = async (req, res) => {
       req.body
     );
 
+    res.locals.client = client;
+    res.json(client);
+
     res.status(201).json(client);
   } catch (err) {
     res.status(400).json({ msg: err.message });
@@ -43,6 +46,7 @@ exports.updateClient = async (req, res) => {
       req.params.id,
       req.body
     );
+    res.locals.client = client;
     res.json(client);
   } catch (err) {
     res.status(400).json({ msg: err.message });
@@ -51,7 +55,9 @@ exports.updateClient = async (req, res) => {
 
 exports.deleteClient = async (req, res) => {
   try {
-    await clientService.deleteClient(req.user.companyId, req.params.id);
+    const client = await clientService.deleteClient(req.user.companyId, req.params.id);
+    res.locals.client = client;
+    res.json(client);
     res.json({ msg: "Cliente eliminado correctamente" });
   } catch (err) {
     res.status(400).json({ msg: err.message });

@@ -8,6 +8,7 @@ exports.createTask = async (req, res) => {
       req.body
     );
 
+    res.locals.task = task;
     res.status(201).json(task);
   } catch (err) {
     res.status(400).json({ msg: err.message });
@@ -16,7 +17,13 @@ exports.createTask = async (req, res) => {
 
 exports.getTasks = async (req, res) => {
   try {
-    const tasks = await taskService.getTasks(req.user.companyId);
+    const { clientId } = req.query;
+
+    const tasks = await taskService.getTasks(
+      req.user.companyId,
+      clientId
+    );
+
     res.json(tasks);
   } catch (err) {
     res.status(400).json({ msg: err.message });
@@ -29,7 +36,11 @@ exports.getTask = async (req, res) => {
       req.user.companyId,
       req.params.id
     );
-    if (!task) return res.status(404).json({ msg: "Tarea no encontrada" });
+
+    if (!task) {
+      return res.status(404).json({ msg: "Tarea no encontrada" });
+    }
+
     res.json(task);
   } catch (err) {
     res.status(400).json({ msg: err.message });
@@ -43,6 +54,8 @@ exports.updateTask = async (req, res) => {
       req.params.id,
       req.body
     );
+
+    res.locals.task = task;
     res.json(task);
   } catch (err) {
     res.status(400).json({ msg: err.message });

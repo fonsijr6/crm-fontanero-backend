@@ -8,56 +8,25 @@ const { auth } = require("../../middleware/auth.mw");
 const { requireRole } = require("../../middleware/requireRole");
 const { requireCompany } = require("../../middleware/requireCompany");
 
-// ✅ Listar empleados
-router.get(
-  "/",
-  auth,
-  requireRole(["owner", "admin"]),
-  controller.getUsers
-);
+// Listar empleados
+router.get("/", auth, requireRole(["owner", "admin"]), controller.getUsers);
 
-// ✅ Crear empleado
-router.post(
-  "/",
-  auth,
-  requireRole(["owner"]),   // solo owner puede crear empleados
-  controller.createUser
-);
+// Crear empleado
+router.post("/", auth, requireRole(["owner"]), controller.createUser);
 
-// ✅ Ver empleado
-router.get(
-  "/:id",
-  auth,
-  requireCompany(User),
-  requireRole(["owner", "admin"]),
-  controller.getUser
-);
+// Ver empleado
+router.get("/:id", auth, requireCompany(User), requireRole(["owner", "admin"]), controller.getUser);
 
-// ✅ Actualizar empleado (cambiar rol, email…)
-router.put(
-  "/:id",
-  auth,
-  requireCompany(User),
-  requireRole(["owner"]),  // solo owner puede editar empleados
-  controller.updateUser
-);
+// Actualizar empleado
+router.put("/:id", auth, requireCompany(User), requireRole(["owner"]), controller.updateUser);
 
-// ✅ Desactivar empleado
-router.put(
-  "/:id/deactivate",
-  auth,
-  requireCompany(User),
-  requireRole(["owner"]),
-  controller.deactivateUser
-);
+// Cambiar permisos
+router.put("/:id/permissions", auth, requireRole(["owner"]), controller.updatePermissions);
 
-// ✅ Eliminar empleado
-router.delete(
-  "/:id",
-  auth,
-  requireCompany(User),
-  requireRole(["owner"]),
-  controller.deleteUser
-);
+// Desactivar empleado
+router.put("/:id/deactivate", auth, requireCompany(User), requireRole(["owner"]), controller.deactivateUser);
+
+// Eliminar empleado
+router.delete("/:id", auth, requireCompany(User), requireRole(["owner"]), controller.deleteUser);
 
 module.exports = router;

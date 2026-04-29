@@ -5,28 +5,34 @@ const Invoice = require("../../models/Invoice");
 const controller = require("../../controllers/invoice.controller");
 
 const { auth } = require("../../middleware/auth.mw");
-const { requireRole } = require("../../middleware/requireRole");
 const { requireCompany } = require("../../middleware/requireCompany");
+const { requirePermission } = require("../../middleware/requirePermission");
+const { requireRole } = require("../../middleware/requireRole");
 const { auditAction } = require("../../middleware/auditAction");
 
-// ✅ Crear factura (owner, admin)
+// Crear factura
 router.post(
   "/",
   auth,
-  requireRole(["owner", "admin"]),
-  auditAction("Crear factura", "invoice"),
+  requirePermission("invoices", "create"),
+  auditAction({
+    module: "invoices",
+    action: "create",
+    getEntityLabel: (req, res) =>
+      `Factura ${res.locals.invoice?.invoiceNumber}`,
+  }),
   controller.createInvoice
 );
 
-// ✅ Listar facturas (todos menos viewer)
+// Listar facturas
 router.get(
   "/",
   auth,
-  requireRole(["owner", "admin", "worker", "viewer"]),
+  requirePermission("invoices", "view"),
   controller.getInvoices
 );
 
-// ✅ Obtener factura por ID
+// Obtener factura concreto
 router.get(
   "/:id",
   auth,
@@ -35,34 +41,23 @@ router.get(
   controller.getInvoice
 );
 
-// ✅ Actualizar factura (solo si está draft)
-router.put(
-  "/:id",
-  auth,
-  requireCompany(Invoice),
-  requireRole(["owner", "admin"]),
-  auditAction("Actualizar factura", "invoice"),
-  controller.updateInvoice
-);
-
-// ✅ Cambiar estado
+// Cambiar estado factura
 router.put(
   "/:id/status",
   auth,
   requireCompany(Invoice),
-  requireRole(["owner", "admin"]),
-  auditAction("Cambiar estado factura", "invoice"),
+  requirePermission("invoices", "edit"),
+  auditAction({
+    module: "invoices",
+    action: "status_change",
+    getEntityLabel: (req, res) =>
+      `Factura ${res.locals.invoice?.invoiceNumber}`,
+    getMeta: (req, res) => ({
+      from: res.locals.prevStatus,
+      to: res.locals.invoice?.status,
+    }),
+  }),
   controller.updateInvoiceStatus
-);
-
-// ✅ Eliminar factura
-router.delete(
-  "/:id",
-  auth,
-  requireCompany(Invoice),
-  requireRole(["owner"]),
-  auditAction("Eliminar factura", "invoice"),
-  controller.deleteInvoice
 );
 
 module.exports = router;

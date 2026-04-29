@@ -7,22 +7,30 @@ const controller = require("../../controllers/client.controller");
 const { auth } = require("../../middleware/auth.mw");
 const { requireRole } = require("../../middleware/requireRole");
 const { requireCompany } = require("../../middleware/requireCompany");
+const { requirePermission } = require("../../middleware/requirePermission");
 const { auditAction } = require("../../middleware/auditAction");
 
-// ✅ Crear cliente (owner, admin, worker)
+// ✅ Crear cliente
 router.post(
   "/",
   auth,
   requireRole(["owner", "admin", "worker"]),
-  auditAction("Crear cliente", "client"),
+  requirePermission("clients", "create"),
+  auditAction({
+    module: "clients",
+    action: "create",
+    getEntityLabel: (req, res) =>
+      res.locals.client?.name || req.body.name,
+  }),
   controller.createClient
 );
 
-// ✅ Listar clientes de la empresa (todos menos viewer)
+// ✅ Listar clientes
 router.get(
   "/",
   auth,
   requireRole(["owner", "admin", "worker", "viewer"]),
+  requirePermission("clients", "view"),
   controller.getClients
 );
 
@@ -40,8 +48,14 @@ router.put(
   "/:id",
   auth,
   requireCompany(Client),
-  requireRole(["owner", "admin", "worker"]),
-  auditAction("Actualizar cliente", "client"),
+  requireRole(["owner", "admin"]),
+  requirePermission("clients", "edit"),
+  auditAction({
+    module: "clients",
+    action: "update",
+    getEntityLabel: (req, res) =>
+      res.locals.client?.name || req.body.name,
+  }),
   controller.updateClient
 );
 
@@ -51,7 +65,13 @@ router.delete(
   auth,
   requireCompany(Client),
   requireRole(["owner", "admin"]),
-  auditAction("Eliminar cliente", "client"),
+  requirePermission("clients", "delete"),
+  auditAction({
+    module: "clients",
+    action: "delete",
+    getEntityLabel: (req, res) =>
+      res.locals.client?.name,
+  }),
   controller.deleteClient
 );
 

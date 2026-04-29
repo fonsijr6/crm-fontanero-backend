@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema(
   {
-    // ✅ A qué empresa pertenece este producto
     companyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Company",
@@ -10,79 +9,59 @@ const productSchema = new mongoose.Schema(
       index: true,
     },
 
-    // ✅ Nombre del producto o servicio
     name: {
       type: String,
       required: true,
       trim: true,
+      maxlength: 100,
     },
 
-    // ✅ Descripción opcional
     description: {
       type: String,
       trim: true,
       default: "",
     },
 
-    // ✅ Tipo: Producto físico o servicio
+    // 🔑 CLAVE: tipo de producto
     type: {
       type: String,
       enum: ["material", "service"],
       default: "material",
     },
 
-    // ✅ Precio unitario
-    price: {
+    // ✅ Precio base (servicio o material)
+    unitPrice: {
       type: Number,
       required: true,
-      default: 0,
+      min: 0,
     },
 
-    // ✅ Impuesto (IVA)
     taxRate: {
       type: Number,
-      required: true,
       default: 21,
     },
 
-    // ✅ Unidad de medida (opcional)
     unit: {
       type: String,
-      default: "unidad", // unidad, hora, metro, pack…
+      default: "unidad", // unidad, hora, metro, kg...
     },
 
-    // ✅ SKU o referencia interna
-    sku: {
+    category: {
       type: String,
       trim: true,
       default: "",
     },
 
-    // ✅ Si quieres enlazar con stock
-    stockQuantity: {
-      type: Number,
-      default: 0,
-    },
-
-    // ✅ Umbral para avisos de stock bajo
-    stockAlertThreshold: {
-      type: Number,
-      default: 0,
-    },
-
-    // ✅ Imagen opcional del producto
     imageUrl: {
       type: String,
       default: "",
     },
 
-    // ✅ Activo / desactivado (no borrar productos antiguos)
     isActive: {
       type: Boolean,
       default: true,
     },
 
-    // ✅ Auditoría
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

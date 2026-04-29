@@ -4,77 +4,57 @@ exports.createUser = async (req, res) => {
   try {
     const user = await userService.createUser({
       companyId: req.user.companyId,
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password,
-      role: req.body.role,
+      ...req.body
     });
-
-    return res.status(201).json(user);
+    res.status(201).json(user);
   } catch (err) {
-    return res.status(400).json({ msg: err.message });
+    res.status(400).json({ msg: err.message });
   }
 };
 
 exports.getUsers = async (req, res) => {
-  try {
-    const users = await userService.getUsers(req.user.companyId);
-    return res.json(users);
-  } catch (err) {
-    return res.status(400).json({ msg: err.message });
-  }
+  const users = await userService.getUsers(req.user.companyId);
+  res.json(users);
 };
 
 exports.getUser = async (req, res) => {
-  try {
-    const user = await userService.getUserById(req.user.companyId, req.params.id);
-    if (!user) return res.status(404).json({ msg: "Usuario no encontrado" });
-    return res.json(user);
-  } catch (err) {
-    return res.status(400).json({ msg: err.message });
-  }
+  const user = await userService.getUserById(req.user.companyId, req.params.id);
+  if (!user) return res.status(404).json({ msg: "Usuario no encontrado" });
+  res.json(user);
 };
 
 exports.updateUser = async (req, res) => {
-  try {
-    const user = await userService.updateUser(
-      req.user.companyId,
-      req.params.id,
-      req.body
-    );
-    return res.json(user);
-  } catch (err) {
-    return res.status(400).json({ msg: err.message });
-  }
-};
-
-exports.deactivateUser = async (req, res) => {
-  try {
-    const user = await userService.deactivateUser(req.user.companyId, req.params.id);
-    return res.json(user);
-  } catch (err) {
-    return res.status(400).json({ msg: err.message });
-  }
+  const user = await userService.updateUser(
+    req.user.companyId,
+    req.params.id,
+    req.body
+  );
+  res.json(user);
 };
 
 exports.updatePermissions = async (req, res) => {
-  try {
-    const user = await User.findOneAndUpdate(
-      { _id: req.params.id, companyId: req.user.companyId },
-      { permissions: req.body.permissions },
-      { new: true }
-    );
-    res.json(user);
-  } catch (e) {
-    res.status(400).json({ msg: e.message });
+  if (req.user.role !== "owner") {
+    return res.status(403).json({ msg: "Solo el owner puede cambiar permisos" });
   }
+
+  const user = await userService.updatePermissions(
+    req.user.companyId,
+    req.params.id,
+    req.body.permissions
+  );
+
+  res.json(user);
+};
+
+exports.deactivateUser = async (req, res) => {
+  const user = await userService.deactivateUser(
+    req.user.companyId,
+    req.params.id
+  );
+  res.json(user);
 };
 
 exports.deleteUser = async (req, res) => {
-  try {
-    await userService.deleteUser(req.user.companyId, req.params.id);
-    return res.json({ msg: "Usuario eliminado correctamente" });
-  } catch (err) {
-    return res.status(400).json({ msg: err.message });
-  }
+  await userService.deleteUser(req.user.companyId, req.params.id);
+  res.json({ msg: "Usuario eliminado correctamente" });
 };

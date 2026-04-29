@@ -1,22 +1,39 @@
 const AuditLog = require("../models/AuditLog");
 
 module.exports = {
-  async log({ companyId, userId, action, module, entityId, ip, userAgent }) {
-    return await AuditLog.create({
+  async log({
+    companyId,
+    userId,
+    module,
+    action,
+    entityId = null,
+    entityLabel = null,
+    meta = null,
+    req,
+  }) {
+    return AuditLog.create({
       companyId,
       userId,
-      action,
       module,
+      action,
       entityId,
-      ip,
-      userAgent
+      entityLabel,
+      meta,
+      ip: req?.ip,
+      userAgent: req?.headers["user-agent"],
     });
   },
 
-  async getLogs(companyId, filters = {}) {
-    return await AuditLog.find({ companyId, ...filters })
+  async getLogs(companyId, filters = {}, options = {}) {
+    const {
+      limit = 200,
+      skip = 0,
+    } = options;
+
+    return AuditLog.find({ companyId, ...filters })
       .populate("userId", "name email role")
       .sort({ createdAt: -1 })
-      .limit(200);
-  }
+      .skip(skip)
+      .limit(limit);
+  },
 };

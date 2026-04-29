@@ -11,7 +11,7 @@ const taskSchema = new mongoose.Schema(
     },
 
     // ✅ Cliente asociado a la tarea
-    clientId: {
+    client: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Client",
       required: true,

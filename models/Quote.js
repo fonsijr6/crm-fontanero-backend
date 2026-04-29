@@ -1,99 +1,140 @@
 const mongoose = require("mongoose");
 
+const quoteItemSchema = new mongoose.Schema(
+  {
+    productId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
+      required: true,
+    },
+
+    // ✅ Snapshot del producto
+    name: {
+      type: String,
+      required: true,
+    },
+
+    description: {
+      type: String,
+      default: "",
+    },
+
+    productType: {
+      type: String,
+      enum: ["material", "service"],
+      required: true,
+    },
+
+    unit: {
+      type: String,
+      required: true, // unidad, hora, metro...
+    },
+
+    quantity: {
+      type: Number,
+      required: true,
+      min: 0,
+      default: 1,
+    },
+
+    unitPrice: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+
+    taxRate: {
+      type: Number,
+      default: 21,
+    },
+
+    total: {
+      type: Number,
+      required: true, // calculado
+    },
+  },
+  { _id: false }
+);
+
 const quoteSchema = new mongoose.Schema(
   {
-    // ✅ Multi-empresa
     companyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Company",
       required: true,
       index: true,
     },
-
-    // ✅ Cliente al que va dirigido
-    clientId: {
+    
+    client: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Client",
       required: true,
     },
 
-    // ✅ Quién creó el presupuesto
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
 
-    // ✅ Número del presupuesto (PRES-001, etc.)
     quoteNumber: {
       type: String,
       required: true,
       trim: true,
     },
 
-    // ✅ Fecha de creación
     date: {
       type: Date,
-      required: true,
       default: Date.now,
     },
 
-    // ✅ Validez (por ejemplo 30 días)
     validUntil: {
       type: Date,
       default: null,
     },
 
-    // ✅ Líneas del presupuesto
-    items: [
-      {
-        productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
-        name: { type: String, required: true },      // copia del nombre del producto
-        description: { type: String, default: "" },  // copia opcional
-        quantity: { type: Number, default: 1 },
-        price: { type: Number, required: true },
-        taxRate: { type: Number, default: 21 },
-        total: { type: Number, required: true },     // calculado
-      },
-    ],
+    items: {
+      type: [quoteItemSchema],
+      required: true,
+      minlength: 1,
+    },
 
-    // ✅ Totales
     subtotal: {
       type: Number,
       required: true,
+      min: 0,
     },
 
     taxTotal: {
       type: Number,
       required: true,
+      min: 0,
     },
 
     total: {
       type: Number,
       required: true,
+      min: 0,
     },
 
-    // ✅ Estado del presupuesto
     status: {
       type: String,
-      enum: ["pending", "accepted", "rejected"],
-      default: "pending",
+      enum: ["draft", "accepted", "rejected", "converted"],
+      default: "draft",
+      index: true,
     },
 
-    // ✅ Si se convierte en factura
     invoiceId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Invoice",
       default: null,
     },
 
-    // ✅ URL de PDF (si decides generarlo)
     pdfUrl: {
       type: String,
       default: "",
     },
 
-    // ✅ Notas internas
     notes: {
       type: String,
       default: "",

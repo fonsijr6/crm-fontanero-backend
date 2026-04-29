@@ -1,5 +1,6 @@
 const quoteService = require("../services/quote.service");
 
+// ✅ Crear presupuesto (draft)
 exports.createQuote = async (req, res) => {
   try {
     const quote = await quoteService.createQuote(
@@ -8,12 +9,14 @@ exports.createQuote = async (req, res) => {
       req.body
     );
 
+    res.locals.quote = quote;
     res.status(201).json(quote);
   } catch (err) {
     res.status(400).json({ msg: err.message });
   }
 };
 
+// ✅ Listar presupuestos
 exports.getQuotes = async (req, res) => {
   try {
     const quotes = await quoteService.getQuotes(req.user.companyId);
@@ -23,19 +26,25 @@ exports.getQuotes = async (req, res) => {
   }
 };
 
+// ✅ Obtener presupuesto por ID
 exports.getQuote = async (req, res) => {
   try {
     const quote = await quoteService.getQuote(
       req.user.companyId,
       req.params.id
     );
-    if (!quote) return res.status(404).json({ msg: "Presupuesto no encontrado" });
+
+    if (!quote) {
+      return res.status(404).json({ msg: "Presupuesto no encontrado" });
+    }
+
     res.json(quote);
   } catch (err) {
     res.status(400).json({ msg: err.message });
   }
 };
 
+// ✅ Editar presupuesto (solo si no está convertido)
 exports.updateQuote = async (req, res) => {
   try {
     const quote = await quoteService.updateQuote(
@@ -43,38 +52,46 @@ exports.updateQuote = async (req, res) => {
       req.params.id,
       req.body
     );
+
+    res.locals.quote = quote;
     res.json(quote);
   } catch (err) {
     res.status(400).json({ msg: err.message });
   }
 };
 
+// ✅ Cambiar estado → accepted / rejected
 exports.updateQuoteStatus = async (req, res) => {
   try {
-    const updated = await quoteService.updateQuoteStatus(
+    const { status } = req.body;
+    if (!status) {
+      return res.status(400).json({ msg: "Estado requerido" });
+    }
+
+    const quote = await quoteService.updateQuoteStatus(
       req.user.companyId,
       req.params.id,
-      req.body.status
+      status
     );
-    res.json(updated);
+
+    res.locals.quote = quote;
+    res.json(quote);
   } catch (err) {
     res.status(400).json({ msg: err.message });
   }
 };
 
+// ✅ Convertir presupuesto aceptado → factura
 exports.convertQuoteToInvoice = async (req, res) => {
   try {
-    // Esto se implementará cuando generemos el flujo completo
-    res.json({ msg: "Función pendiente de implementar" });
-  } catch (err) {
-    res.status(400).json({ msg: err.message });
-  }
-};
+    const invoice = await quoteService.convertToInvoice(
+      req.user.companyId,
+      req.user.userId,
+      req.params.id
+    );
 
-exports.deleteQuote = async (req, res) => {
-  try {
-    await quoteService.deleteQuote(req.user.companyId, req.params.id);
-    res.json({ msg: "Presupuesto eliminado correctamente" });
+    res.locals.invoice = invoice;
+    res.json(invoice);
   } catch (err) {
     res.status(400).json({ msg: err.message });
   }
