@@ -30,7 +30,7 @@ const productSchema = new mongoose.Schema(
     },
 
     // ✅ Precio base (servicio o material)
-    unitPrice: {
+    price: {
       type: Number,
       required: true,
       min: 0,

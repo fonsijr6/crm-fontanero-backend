@@ -37,7 +37,7 @@ const invoiceItemSchema = new mongoose.Schema(
       default: 1,
     },
 
-    unitPrice: {
+    price: {
       type: Number,
       required: true,
       min: 0,

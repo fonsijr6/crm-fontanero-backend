@@ -9,10 +9,15 @@ exports.createProduct = async (req, res) => {
       req.body
     );
     res.locals.product = product;
-    res.json(product);
     res.status(201).json(product);
   } catch (err) {
-    res.status(400).json({ msg: err.message });
+    console.error("❌ ERROR CREATE PRODUCT:", err);
+    console.error(err.stack);
+    res.status(400).json({
+      msg: err.message,
+      name: err.name,
+      stack: err.stack,
+    });
   }
 };
 
@@ -67,7 +72,6 @@ exports.deleteProduct = async (req, res) => {
       req.params.id
     );
     res.locals.product = product;
-    res.json(product);
     res.json({ msg: "Producto eliminado correctamente" });
   } catch (err) {
     res.status(400).json({ msg: err.message });

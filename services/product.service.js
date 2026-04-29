@@ -1,4 +1,5 @@
 const Product = require("../models/Product");
+const Stock = require("../models/Stock");
 const stockService = require("./stock.service");
 
 module.exports = {
@@ -17,8 +18,10 @@ module.exports = {
       throw new Error("El tipo de producto no es válido.");
     }
 
-    if (data.unitPrice < 0) {
-      throw new Error("El precio no puede ser negativo.");
+    const price = Number(data.price);
+
+    if (Number.isNaN(price) || price < 0) {
+      throw new Error("El precio debe ser un número válido.");
     }
 
     if (data.taxRate < 0 || data.taxRate > 100) {
@@ -31,7 +34,7 @@ module.exports = {
       name: data.name.trim(),
       description: data.description || "",
       type: data.type,
-      unitPrice: data.unitPrice,
+      price,
       taxRate: data.taxRate ?? 21,
       unit: data.unit || "unidad",
       category: data.category?.trim() || "",
@@ -40,13 +43,13 @@ module.exports = {
     });
 
     // ✅ CREAR STOCK AUTOMÁTICO SOLO SI ES MATERIAL
-    if (product.type === "material") {
-      await stockService.createForProduct(
-        companyId,
-        product._id,
-        Number(data.initialStock) || 0
-      );
-    }
+    // if (product.type === "material") {
+    //   await stockService.createForProduct(
+    //     companyId,
+    //     product._id,
+    //     Number(data.initialStock) || 0
+    //   );
+    // }
 
     return product;
   },
@@ -64,7 +67,7 @@ module.exports = {
       throw new Error("El nombre no puede superar los 100 caracteres.");
     }
 
-    if (data.unitPrice !== undefined && data.unitPrice < 0) {
+    if (data.price !== undefined && data.price < 0) {
       throw new Error("El precio no puede ser negativo.");
     }
 
