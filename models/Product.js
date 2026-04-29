@@ -27,8 +27,8 @@ const productSchema = new mongoose.Schema(
     // ✅ Tipo: Producto físico o servicio
     type: {
       type: String,
-      enum: ["product", "service"],
-      default: "product",
+      enum: ["material", "service"],
+      default: "material",
     },
 
     // ✅ Precio unitario

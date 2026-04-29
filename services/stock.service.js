@@ -22,7 +22,7 @@ module.exports = {
       category: data.category || "",
       quantity: data.quantity || 0,
       unit: data.unit || "unidad",
-      unitPrice: data.unitPrice || 0,
+      price: data.price || 0,
       minStock: data.minStock || 0,
       updatedBy: userId,
     });

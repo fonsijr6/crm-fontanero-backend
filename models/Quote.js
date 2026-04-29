@@ -51,7 +51,7 @@ const quoteSchema = new mongoose.Schema(
         name: { type: String, required: true },      // copia del nombre del producto
         description: { type: String, default: "" },  // copia opcional
         quantity: { type: Number, default: 1 },
-        unitPrice: { type: Number, required: true },
+        price: { type: Number, required: true },
         taxRate: { type: Number, default: 21 },
         total: { type: Number, required: true },     // calculado
       },
